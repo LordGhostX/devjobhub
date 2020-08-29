@@ -77,7 +77,7 @@ def stats(update, context):
     total_jobs = db.jobs.count_documents({})
     total_stack = db.user_stack.count_documents({})
     stack_stats = ""
-    for i in list(db.user_stack.aggregate([{"$group": {"_id": "$stack", "count": {"$sum": 1}}}, {"$sort": {"count": -1}}])):
+    for i in list(db.user_stack.aggregate([{"$group": {"_id": "$stack", "count": {"$sum": 1}}}, {"$sort": {"count": -1}}, {"$limit": 10}])):
         stack_stats += "{} - {:.2f}%\n".format(i["_id"],
                                                i["count"] / total_stack * 100)
     context.bot.send_message(
