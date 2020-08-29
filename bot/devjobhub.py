@@ -76,6 +76,14 @@ def remove_stack(update, context):
         chat_id=chat_id, text=config["messages"]["menu"])
 
 
+def stats(update, context):
+    chat_id = update.effective_chat.id
+    total_users = db.users.count_documents({})
+    total_jobs = db.jobs.count_documents({})
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, datetime.datetime.now()))
+
+
 def echo(update, context):
     chat_id = update.effective_chat.id
     last_command = db.users.find_one({"chat_id": chat_id}).get("last_command")
@@ -101,12 +109,14 @@ def echo(update, context):
 
 start_handler = CommandHandler("start", start)
 menu_handler = CommandHandler("menu", menu)
+stats_handler = CommandHandler("stats", stats)
 view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 remove_stack_handler = CommandHandler("remove_stack", remove_stack)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(menu_handler)
+dispatcher.add_handler(stats_handler)
 dispatcher.add_handler(view_stack_handler)
 dispatcher.add_handler(add_stack_handler)
 dispatcher.add_handler(remove_stack_handler)
