@@ -18,9 +18,9 @@ def start(update, context):
     chat_id = update.effective_chat.id
     if not db.users.find_one({"chat_id": chat_id}):
         db.users.insert_one(
-            {"chat_id": chat_id, "last_command": None, "date": datetime.datetime.now()})
+            {"chat_id": chat_id, "last_command": None, "active": True, "date": datetime.datetime.now()})
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["start"])
+        chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]))
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
 
@@ -94,7 +94,8 @@ def echo(update, context):
     chat_id = update.effective_chat.id
     last_command = db.users.find_one({"chat_id": chat_id}).get("last_command")
     if last_command == "add_stack":
-        stack = [i.strip().lower() for i in update.message.text.split(",")]
+        stack = [i.strip().lower()
+                 for i in update.message.text.split(",") if i.strip() != ""]
         for i in stack:
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         db.user_stack.insert_many(

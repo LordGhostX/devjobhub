@@ -1,7 +1,7 @@
 {
   "token": "TOKEN",
   "messages": {
-    "start": "Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\nweworkremotely.com\nremoteok.io\nemployremotely.com\nremotive.io\nstackoverflow.com\njobs.github.com",
+    "start": "Hi {}, Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\n• weworkremotely.com\n• remoteok.io\n• employremotely.com\n• remotive.io\n• stackoverflow.com\n• jobs.github.com",
     "menu": "What do you wanna do today 🤗\n\n/view_stack 👀\n/add_stack 😏\n/remove_stack 😱\n/donate 💰\n/stats ⚙️",
     "empty_stack": "You have not told us your stack, get started with /add_stack 😏",
     "stack": "Your programming stack are as follows\n\n{}\n\nAdd more with /add_stack 😏 or remove with /remove_stack 😱",
