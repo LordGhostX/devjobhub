@@ -143,7 +143,7 @@ def remotive_jobs():
             "company": job.find("div", {"class": "company"}).find("span").text.strip(),
             "role": job.find("a").text.strip(),
             "location": location,
-            "tags": [i.text.strip() for i in job.find_all("a", {"class": "job-tag"})]
+            "tags": [i.text.strip().lower() for i in job.find_all("a", {"class": "job-tag"})]
         })
     return jobs
 
@@ -157,7 +157,7 @@ def remotive_info(href):
 
     company = page.find("div", {"class": "content"}).find("h2").text.strip()
     title = page.find("div", {"class": "content"}).find("h1").text.strip()
-    tags = [i.text.strip() for i in page.find(
+    tags = [i.text.strip().lower() for i in page.find(
         "div", {"class": "job-tags"}).find_all("a", {"class": "job-tag"})]
     description = page.find("div", {"class": "job-description"}).text.strip()
     return {
