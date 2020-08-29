@@ -58,12 +58,16 @@ def echo(update, context):
     last_command = db.users.find_one({"chat_id": chat_id}).get("last_command")
     if last_command == "add_stack":
         stack = [i.strip().lower() for i in update.message.text.split(",")]
+        for i in stack:
+            db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         db.user_stack.insert_many(
             [{"chat_id": chat_id, "stack": i} for i in stack])
-        db.users.update_one({"chat_id": chat_id}, {
-                            "$set": {"last_command": None}})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["added_stack"])
+    else:
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["unknown"])
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
 start_handler = CommandHandler("start", start)
