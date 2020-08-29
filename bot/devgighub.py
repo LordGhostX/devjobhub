@@ -25,6 +25,7 @@ def start(update, context):
 
 
 def menu(update, context):
+    chat_id = update.effective_chat.id
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
 
