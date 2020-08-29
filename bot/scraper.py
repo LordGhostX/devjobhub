@@ -93,8 +93,8 @@ def employremotely_jobs():
             "href": "https://www.employremotely.com" + job.find("span", {"class": "c-job-card__job-title"}).find("a")["href"],
             "company": job.find("span", {"class": "c-job-card__company"}).text.strip(),
             "role": job.find("span", {"class": "c-job-card__job-title"}).find("a").text.strip(),
-            "job_type": job.find("span", {"class": "c-job-card__contract-type"}).text.strip(),
-            "location": job.find("span", {"class": "c-job-card__location"}).text.strip()
+            "job_type": job.find("span", {"class": "c-job-card__contract-type"}).text.strip()[2:],
+            "location": job.find("span", {"class": "c-job-card__location"}).text.strip()[2:]
         })
     return jobs
 
@@ -109,14 +109,14 @@ def employremotely_info(href):
     title = page.find("h1", {"class": "u-c--white"}).text.strip()
     deadline = page.find_all(
         "span", {"class": "job-header__detail"})[-1].text.strip()
-    tags = [i.text.strip() for i in page.find("section", {
+    tags = [i.text.strip().lower() for i in page.find("section", {
         "class": "job-information__tags"}).find_all("span", {"class": "c-pill"})]
     description = page.find(
         "section", {"class": "job-information__text-block"}).text.strip()
     return {
         "title": title,
         "tags": tags,
-        "deadline": deadline,
+        "deadline": deadline[2:],
         "description": description,
         "href": href
     }
