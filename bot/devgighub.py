@@ -24,6 +24,11 @@ def start(update, context):
         chat_id=chat_id, text=config["messages"]["menu"])
 
 
+def menu(update, context):
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["menu"])
+
+
 def view_stack(update, context):
     chat_id = update.effective_chat.id
     stack = list(db.user_stack.find({"chat_id": chat_id}))
@@ -61,10 +66,12 @@ def echo(update, context):
 
 
 start_handler = CommandHandler("start", start)
+menu_handler = CommandHandler("menu", menu)
 view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 dispatcher.add_handler(start_handler)
+dispatcher.add_handler(menu_handler)
 dispatcher.add_handler(view_stack_handler)
 dispatcher.add_handler(add_stack_handler)
 dispatcher.add_handler(echo_handler)
