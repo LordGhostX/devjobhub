@@ -3,6 +3,7 @@ import json
 import pymongo
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
+from telegram.ext import MessageHandler, Filters
 
 config = json.load(open("config.json"))
 updater = Updater(
@@ -30,14 +31,42 @@ def view_stack(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["empty_stack"])
     else:
-        stack_message = config["messages"]["stack"].format(", ".join(stack))
+        stack = [i["stack"] for i in stack]
+        stack_message = config["messages"]["stack"].format(
+            ", ".join(stack))
         context.bot.send_message(
             chat_id=chat_id, text=stack_message)
 
 
+def add_stack(update, context):
+    chat_id = update.effective_chat.id
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["add_stack"])
+    last_command = "add_stack"
+    db.users.update_one({"chat_id": chat_id}, {
+                        "$set": {"last_command": last_command}})
+
+
+def echo(update, context):
+    chat_id = update.effective_chat.id
+    last_command = db.users.find_one({"chat_id": chat_id}).get("last_command")
+    if last_command == "add_stack":
+        stack = [i.strip().lower() for i in update.message.text.split(",")]
+        db.user_stack.insert_many(
+            [{"chat_id": chat_id, "stack": i} for i in stack])
+        db.users.update_one({"chat_id": chat_id}, {
+                            "$set": {"last_command": None}})
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["added_stack"])
+
+
 start_handler = CommandHandler("start", start)
 view_stack_handler = CommandHandler("view_stack", view_stack)
+add_stack_handler = CommandHandler("add_stack", add_stack)
+echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(view_stack_handler)
+dispatcher.add_handler(add_stack_handler)
+dispatcher.add_handler(echo_handler)
 
 updater.start_polling()
