@@ -1,0 +1,5 @@
+{
+  "token": "TOKEN",
+  "start_message": "Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\nweworkremotely.com\nremoteok.io\nemployremotely.com\nremotive.io\nstackoverflow.com",
+  "menu_message": "Select what you wanna do today 🤗\n\n/view_stack 👀\n/add_stack 😏\n/remove_stack 😱\n/stats ⚙️"
+}
