@@ -1,4 +1,5 @@
 import datetime
+import time
 import json
 import pymongo
 from telegram.ext import Updater
@@ -74,8 +75,13 @@ def stats(update, context):
     chat_id = update.effective_chat.id
     total_users = db.users.count_documents({})
     total_jobs = db.jobs.count_documents({})
+    total_stack = db.user_stack.count_documents({})
+    stack_stats = ""
+    for i in list(db.user_stack.aggregate([{"$group": {"_id": "$stack", "count": {"$sum": 1}}}, {"$sort": {"count": -1}}])):
+        stack_stats += "{} - {:.2f}%\n".format(i["_id"],
+                                               i["count"] / total_stack * 100)
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, datetime.datetime.now()))
+        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S")))
 
 
 def donate(update, context):
@@ -115,6 +121,7 @@ view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 remove_stack_handler = CommandHandler("remove_stack", remove_stack)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
+
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(menu_handler)
 dispatcher.add_handler(donate_handler)
