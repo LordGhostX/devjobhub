@@ -1,7 +1,7 @@
 {
   "token": "TOKEN",
   "messages": {
-    "start": "Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\nweworkremotely.com\nremoteok.io\nemployremotely.com\nremotive.io\nstackoverflow.com",
+    "start": "Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\nweworkremotely.com\nremoteok.io\nemployremotely.com\nremotive.io\nstackoverflow.com\njobs.github.com",
     "menu": "What do you wanna do today 🤗\n\n/view_stack 👀\n/add_stack 😏\n/remove_stack 😱\n/donate 💰\n/stats ⚙️",
     "empty_stack": "You have not told us your stack, get started with /add_stack 😏",
     "stack": "Your programming stack are as follows\n\n{}\n\nAdd more with /add_stack 😏 or remove with /remove_stack 😱",
@@ -9,7 +9,7 @@
     "updated_stack": "Your programming stack has been successfully updated 🙂",
     "unknown": "I don't understand your message ⁉️, please check /menu for valid commands",
     "remove_stack": "Your stacks are as follows\n\n{}\n\nEnter the ones you want to delete seperated by comma (,)",
-    "stats": "Dev Job Hub Statistics ⚙️\n\nTotal Jobs Posted: {:,}\nTotal Users: {:,}\n\nStack By Frequency\n{}\nLast Updated: {}",
+    "stats": "Dev Job Hub Statistics ⚙️\n\nTotal Jobs Posted: {:,}\nTotal Users: {:,}\n\nTop 10 Stack By Frequency\n{}\nLast Updated: {}",
     "donate": "Developers Job Hub is free to use meaning you don't ever pay to use the service. However, do we accept donations to keep our servers and scrapers working. Feel free to donate to the service with cryptocurrency\n\nBitcoin: 1KjA4Q8e13cKawahZC6PzBjsQTY145vK3J\n\nEthereum: 0x80aa0F0BF45C36F04188C42199D38B5584991608\n\nLitecoin: ltc1q940edxufgmhxx5fhanxapajdaecscngv8nkc3v\n\nBitcoin Cash: qzwaw3m0ndk8suk59ppvs9p9n2rynrzgtggsa0xjg5"
   }
 }
