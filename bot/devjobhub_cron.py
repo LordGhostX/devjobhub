@@ -91,6 +91,25 @@ def remotive():
                 })
             except:
                 pass
+    for job in jobs:
+        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        job_message = config["messages"]["job_message"].format(
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
+        send_job_to_users(job["details"]["description"],
+                          job["details"]["tags"], job_message)
+
+
+def stackoverflow():
+    jobs = []
+    for job in scraper.stackoverflow_jobs():
+        if not db.jobs.find_one({"href": job["href"]}):
+            try:
+                jobs.append({
+                    "info": job,
+                    "details": scraper.stackoverflow_info(job["href"])
+                })
+            except:
+                pass
         break
     for job in jobs:
         db.jobs.insert_one({**job, "href": job["info"]["href"]})
@@ -104,4 +123,5 @@ if __name__ == "__main__":
     # weworkremotely()
     # remoteok()
     # employremotely()
-    remotive()
+    # remotive()
+    stackoverflow()

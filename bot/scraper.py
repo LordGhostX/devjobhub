@@ -180,10 +180,10 @@ def stackoverflow_jobs():
     for job in job_section.find_all("div", {"class": "-job"}):
         jobs.append({
             "href": "https://stackoverflow.com" + job.find("a", {"class": "s-link"})["href"],
-            "location": job.find_all("span")[1].text.strip(),
+            "location": job.find("span", {"class": "fc-black-500"}).text.strip(),
             "company": job.find("h3", {"class": "fc-black-700"}).find("span").text.strip(),
             "role": job.find("a", {"class": "s-link"})["title"],
-            "tags": [i.text.strip() for i in job.find_all("a", {"class": "post-tag"})]
+            "tags": [i.text.strip().lower() for i in job.find_all("a", {"class": "post-tag"})]
         })
     return jobs
 
@@ -197,7 +197,7 @@ def stackoverflow_info(href):
 
     title = page.find("h1", {"class": "fs-headline1 mb4"}).text.strip()
     company = page.find("a", {"class": "fc-black-700"}).text.strip()
-    tags = [i.text.strip() for i in page.find_all("section", {"class": "mb32"})[
+    tags = [i.text.strip().lower() for i in page.find_all("section", {"class": "mb32"})[
         1].find_all("a", {"class": "post-tag no-tag-menu"})]
     description = page.find("div", {"id": "overview-items"}).text.strip()
     return {
