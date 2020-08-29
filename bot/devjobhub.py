@@ -17,7 +17,7 @@ def start(update, context):
     chat_id = update.effective_chat.id
     if not db.users.find_one({"chat_id": chat_id}):
         db.users.insert_one(
-            {"chat_id": chat_id, "date": datetime.datetime.now()})
+            {"chat_id": chat_id, "last_command": None, "date": datetime.datetime.now()})
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["start"])
     context.bot.send_message(
@@ -42,8 +42,6 @@ def view_stack(update, context):
             ", ".join(stack))
         context.bot.send_message(
             chat_id=chat_id, text=stack_message)
-    context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["menu"])
 
 
 def add_stack(update, context):
@@ -53,8 +51,6 @@ def add_stack(update, context):
     last_command = "add_stack"
     db.users.update_one({"chat_id": chat_id}, {
                         "$set": {"last_command": last_command}})
-    context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["menu"])
 
 
 def remove_stack(update, context):
@@ -72,8 +68,6 @@ def remove_stack(update, context):
         last_command = "remove_stack"
         db.users.update_one({"chat_id": chat_id}, {
                             "$set": {"last_command": last_command}})
-    context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["menu"])
 
 
 def stats(update, context):
@@ -82,6 +76,12 @@ def stats(update, context):
     total_jobs = db.jobs.count_documents({})
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, datetime.datetime.now()))
+
+
+def donate(update, context):
+    chat_id = update.effective_chat.id
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["donate"])
 
 
 def echo(update, context):
@@ -110,12 +110,14 @@ def echo(update, context):
 start_handler = CommandHandler("start", start)
 menu_handler = CommandHandler("menu", menu)
 stats_handler = CommandHandler("stats", stats)
+donate_handler = CommandHandler("donate", donate)
 view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 remove_stack_handler = CommandHandler("remove_stack", remove_stack)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(menu_handler)
+dispatcher.add_handler(donate_handler)
 dispatcher.add_handler(stats_handler)
 dispatcher.add_handler(view_stack_handler)
 dispatcher.add_handler(add_stack_handler)
