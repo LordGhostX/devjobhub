@@ -37,7 +37,7 @@ def weworkremotely_info(href):
     page = BeautifulSoup(r.text, "html.parser")
     
     title = page.find("div", {"class": "listing-header-container"}).find("h1").text.strip()
-    tags = [i.text.strip() for i in page.find_all("span", {"class": "listing-tag"})]
+    tags = [i.text.strip().lower() for i in page.find_all("span", {"class": "listing-tag"})]
     description = page.find("div", {"id": "job-listing-show-container"}).text.strip()
     return {
         "title": title,

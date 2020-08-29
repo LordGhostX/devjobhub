@@ -1,5 +1,10 @@
 {
   "token": "TOKEN",
+  "db": {
+    "host": "localhost",
+    "port": 27017,
+    "db_name": "devjobhub"
+  },
   "messages": {
     "start": "Hi {}, Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\n• weworkremotely.com\n• remoteok.io\n• employremotely.com\n• remotive.io\n• stackoverflow.com\n• jobs.github.com",
     "menu": "What do you wanna do today 🤗\n\n/view_stack 👀\n/add_stack 😏\n/remove_stack 😱\n/donate 💰\n/stats ⚙️",

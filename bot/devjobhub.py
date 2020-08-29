@@ -10,8 +10,8 @@ config = json.load(open("config.json"))
 updater = Updater(
     token=config["token"], use_context=True)
 dispatcher = updater.dispatcher
-client = pymongo.MongoClient("localhost", 27017)
-db = client.devjobhub
+client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
+db = client[config["db"]["db_name"]]
 
 
 def start(update, context):
