@@ -14,6 +14,12 @@ client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
 
 
+def parse_stack(stack):
+    stack = stack.strip().lower()
+    accepted_chars = string.ascii_lowercase + string.digits + "-/+#. "
+    return "".join([i for i in stack if i in accepted_chars])
+
+
 def start(update, context):
     chat_id = update.effective_chat.id
     if not db.users.find_one({"chat_id": chat_id}):
@@ -107,7 +113,7 @@ def echo(update, context):
     bot_user = db.users.find_one({"chat_id": chat_id})
     last_command = bot_user["last_command"] if bot_user != None else None
     if last_command == "add_stack":
-        stack = [i.strip().lower()
+        stack = [parse_stack(i)
                  for i in update.message.text.split(",") if i.strip() != ""]
         for i in stack:
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
