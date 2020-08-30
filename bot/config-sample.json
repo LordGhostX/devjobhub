@@ -10,12 +10,12 @@
     "menu": "What do you wanna do today 🤗\n\n/view_stack 👀\n/add_stack 😏\n/remove_stack 😱\n/donate 💰\n/stats ⚙️",
     "empty_stack": "You have not told us your stack, get started with /add_stack 😏",
     "stack": "Your programming stack are as follows\n\n{}\n\nAdd more with /add_stack 😏 or remove with /remove_stack 😱",
-    "add_stack": "Enter the stacks you want to include to your profile separated by comma (,)\n\nIf you want to receive job postings for all stacks enter 'all' without quotes e.g python, react, css, rust",
+    "add_stack": "Enter the stacks you want to include to your profile separated by comma (,) e.g python, react, css, rust\n\nIf you want to receive job postings for all stacks enter 'all' without quotes",
     "updated_stack": "Your programming stack has been successfully updated 🙂",
     "unknown": "I don't understand your message ⁉️, please check /menu for valid commands",
     "remove_stack": "Your stacks are as follows\n\n{}\n\nEnter the ones you want to delete seperated by comma (,)",
     "stats": "Dev Job Hub Statistics ⚙️\n\nTotal Jobs Posted: {:,}\nTotal Users: {:,}\n\nTop 10 Stack By Frequency\n{}\nLast Updated: {}",
-    "donate": "Developers Job Hub is free to use meaning you don't ever pay to use the service. However, do we accept donations to keep our servers and scrapers working. Feel free to donate to the service with cryptocurrency\n\nBitcoin: 1KjA4Q8e13cKawahZC6PzBjsQTY145vK3J\n\nEthereum: 0x80aa0F0BF45C36F04188C42199D38B5584991608\n\nLitecoin: ltc1q940edxufgmhxx5fhanxapajdaecscngv8nkc3v\n\nBitcoin Cash: qzwaw3m0ndk8suk59ppvs9p9n2rynrzgtggsa0xjg5",
+    "donate": "Developers Job Hub is free to use meaning you don't ever pay to use the service. However, we accept donations to keep our servers and scrapers working. Feel free to donate to the service with cryptocurrency ❤️\n\nBitcoin: 1KjA4Q8e13cKawahZC6PzBjsQTY145vK3J\n\nEthereum: 0x80aa0F0BF45C36F04188C42199D38B5584991608\n\nLitecoin: ltc1q940edxufgmhxx5fhanxapajdaecscngv8nkc3v\n\nBitcoin Cash: qzwaw3m0ndk8suk59ppvs9p9n2rynrzgtggsa0xjg5",
     "job_message": "{} 👨‍💻👩‍💻\n\nCompany: {} 🏢\nLocation: {} 📍\nJob Type: {} 💼\nTags: {} 🏷\n{}\nApply Here: {} 🚀\n\nGet regular programming job updates here https://t.me/devjobhub"
   }
 }

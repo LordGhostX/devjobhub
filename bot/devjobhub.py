@@ -86,7 +86,7 @@ def stats(update, context):
         stack_stats += "{} - {:.2f}%\n".format(i["_id"],
                                                i["count"] / total_stack * 100)
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S")))
+        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")))
     time.sleep(0.035)
 
 

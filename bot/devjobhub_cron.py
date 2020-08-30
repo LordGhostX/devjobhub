@@ -1,5 +1,6 @@
 import json
 import time
+import datetime
 import pymongo
 import telegram
 import scraper
@@ -37,7 +38,8 @@ def weworkremotely():
             except:
                 pass
     for job in jobs:
-        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
@@ -55,7 +57,8 @@ def remoteok():
             except:
                 pass
     for job in jobs:
-        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["info"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["info"]["description"],
@@ -74,7 +77,8 @@ def employremotely():
             except:
                 pass
     for job in jobs:
-        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ Deadline: {}\n".format(job["details"]["deadline"]), job["info"]["href"])
         send_job_to_users(job["details"]["description"],
@@ -93,7 +97,8 @@ def remotive():
             except:
                 pass
     for job in jobs:
-        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
@@ -112,7 +117,8 @@ def stackoverflow():
             except:
                 pass
     for job in jobs:
-        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
@@ -130,7 +136,8 @@ def github():
             except:
                 pass
     for job in jobs:
-        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], "None", "", job["info"]["href"])
         send_job_to_users(job["info"]["description"], [], job_message)
