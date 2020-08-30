@@ -219,7 +219,7 @@ def github_jobs():
         jobs.append({
             "href": job["url"],
             "location": job["location"],
-            "title": job["title"],
+            "role": job["title"],
             "company": job["company"],
             "job_type": job["type"],
             "description": job["description"]

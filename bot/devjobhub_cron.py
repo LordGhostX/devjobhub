@@ -15,10 +15,11 @@ def send_job_to_users(description, tags, job_message):
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
                    or i in tags]
-    users = db.user_stack.find({"stack": {"$in": valid_stack}})
+    users = set([i["chat_id"]
+                 for i in db.user_stack.find({"stack": {"$in": valid_stack}})])
     for user in users:
         try:
-            bot.send_message(user["chat_id"], job_message)
+            bot.send_message(user, job_message)
         except:
             pass
         time.sleep(0.035)
@@ -110,7 +111,6 @@ def stackoverflow():
                 })
             except:
                 pass
-        break
     for job in jobs:
         db.jobs.insert_one({**job, "href": job["info"]["href"]})
         job_message = config["messages"]["job_message"].format(
@@ -119,9 +119,27 @@ def stackoverflow():
                           job["details"]["tags"], job_message)
 
 
+def github():
+    jobs = []
+    for job in scraper.github_jobs():
+        if not db.jobs.find_one({"href": job["href"]}):
+            try:
+                jobs.append({
+                    "info": job,
+                })
+            except:
+                pass
+    for job in jobs:
+        db.jobs.insert_one({**job, "href": job["info"]["href"]})
+        job_message = config["messages"]["job_message"].format(
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], "None", "", job["info"]["href"])
+        send_job_to_users(job["info"]["description"], [], job_message)
+
+
 if __name__ == "__main__":
-    # weworkremotely()
-    # remoteok()
-    # employremotely()
-    # remotive()
+    weworkremotely()
+    remoteok()
+    employremotely()
+    remotive()
     stackoverflow()
+    github()
