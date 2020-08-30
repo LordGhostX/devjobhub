@@ -23,6 +23,7 @@ def start(update, context):
         chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]))
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
     time.sleep(0.035)
 
 
@@ -30,6 +31,7 @@ def menu(update, context):
     chat_id = update.effective_chat.id
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
     time.sleep(0.035)
 
 
@@ -45,6 +47,7 @@ def view_stack(update, context):
             ", ".join(stack))
         context.bot.send_message(
             chat_id=chat_id, text=stack_message)
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
     time.sleep(0.035)
 
 
@@ -87,6 +90,7 @@ def stats(update, context):
                                                i["count"] / total_stack * 100)
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")))
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
     time.sleep(0.035)
 
 
@@ -94,6 +98,7 @@ def donate(update, context):
     chat_id = update.effective_chat.id
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["donate"])
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
     time.sleep(0.035)
 
 
