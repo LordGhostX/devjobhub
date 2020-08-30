@@ -16,7 +16,7 @@ def send_job_to_users(description, tags, job_message):
     valid_stack = [i for i in all_stack if i in description.lower()
                    or i in tags]
     users = set([i["chat_id"]
-                 for i in db.user_stack.find({"stack": {"$in": valid_stack}})])
+                 for i in db.user_stack.find({"stack": {"$in": valid_stack + ["all"]}})])
     for user in users:
         try:
             bot.send_message(user, job_message)
