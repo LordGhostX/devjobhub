@@ -76,7 +76,7 @@ def employremotely():
     for job in jobs:
         db.jobs.insert_one({**job, "href": job["info"]["href"]})
         job_message = config["messages"]["job_message"].format(
-            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "Deadline: {} ⏰\n".format(job["details"]["deadline"]), job["info"]["href"])
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ Deadline: {}\n".format(job["details"]["deadline"]), job["info"]["href"])
         send_job_to_users(job["details"]["description"],
                           job["details"]["tags"], job_message)
 
@@ -137,9 +137,15 @@ def github():
 
 
 if __name__ == "__main__":
+    print("Scraping weworkremotely...")
     weworkremotely()
+    print("Scraping remoteok...")
     remoteok()
+    print("Scraping employremotely...")
     employremotely()
+    print("Scraping remotive...")
     remotive()
+    print("Scraping stackoverflow jobs...")
     stackoverflow()
+    print("Scraping github jobs...")
     github()

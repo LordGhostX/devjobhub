@@ -99,7 +99,8 @@ def donate(update, context):
 
 def echo(update, context):
     chat_id = update.effective_chat.id
-    last_command = db.users.find_one({"chat_id": chat_id}).get("last_command")
+    bot_user = db.users.find_one({"chat_id": chat_id})
+    last_command = bot_user["last_command"] if bot_user != None else None
     if last_command == "add_stack":
         stack = [i.strip().lower()
                  for i in update.message.text.split(",") if i.strip() != ""]
