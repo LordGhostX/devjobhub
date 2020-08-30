@@ -1,5 +1,6 @@
 import datetime
 import time
+import string
 import json
 import pymongo
 from telegram.ext import Updater
@@ -113,8 +114,9 @@ def echo(update, context):
     bot_user = db.users.find_one({"chat_id": chat_id})
     last_command = bot_user["last_command"] if bot_user != None else None
     if last_command == "add_stack":
+        stack = ",".join(update.message.text.split("\n"))
         stack = [parse_stack(i)
-                 for i in update.message.text.split(",") if i.strip() != ""]
+                 for i in stack.split(",") if i.strip() != ""]
         for i in stack:
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         db.user_stack.insert_many(
@@ -122,7 +124,9 @@ def echo(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["updated_stack"])
     elif last_command == "remove_stack":
-        stack = [i.strip().lower() for i in update.message.text.split(",")]
+        stack = ",".join(update.message.text.split("\n"))
+        stack = [parse_stack(i)
+                 for i in stack.split(",") if i.strip() != ""]
         for i in stack:
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         context.bot.send_message(
