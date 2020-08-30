@@ -10,25 +10,27 @@ config = json.load(open("config.json"))
 updater = Updater(
     token=config["token"], use_context=True)
 dispatcher = updater.dispatcher
-client = pymongo.MongoClient("localhost", 27017)
-db = client.devjobhub
+client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
+db = client[config["db"]["db_name"]]
 
 
 def start(update, context):
     chat_id = update.effective_chat.id
     if not db.users.find_one({"chat_id": chat_id}):
         db.users.insert_one(
-            {"chat_id": chat_id, "last_command": None, "date": datetime.datetime.now()})
+            {"chat_id": chat_id, "last_command": None, "active": True, "date": datetime.datetime.now()})
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["start"])
+        chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]))
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
+    time.sleep(0.035)
 
 
 def menu(update, context):
     chat_id = update.effective_chat.id
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
+    time.sleep(0.035)
 
 
 def view_stack(update, context):
@@ -43,6 +45,7 @@ def view_stack(update, context):
             ", ".join(stack))
         context.bot.send_message(
             chat_id=chat_id, text=stack_message)
+    time.sleep(0.035)
 
 
 def add_stack(update, context):
@@ -52,6 +55,7 @@ def add_stack(update, context):
     last_command = "add_stack"
     db.users.update_one({"chat_id": chat_id}, {
                         "$set": {"last_command": last_command}})
+    time.sleep(0.035)
 
 
 def remove_stack(update, context):
@@ -69,6 +73,7 @@ def remove_stack(update, context):
         last_command = "remove_stack"
         db.users.update_one({"chat_id": chat_id}, {
                             "$set": {"last_command": last_command}})
+    time.sleep(0.035)
 
 
 def stats(update, context):
@@ -82,19 +87,23 @@ def stats(update, context):
                                                i["count"] / total_stack * 100)
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S")))
+    time.sleep(0.035)
 
 
 def donate(update, context):
     chat_id = update.effective_chat.id
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["donate"])
+    time.sleep(0.035)
 
 
 def echo(update, context):
     chat_id = update.effective_chat.id
-    last_command = db.users.find_one({"chat_id": chat_id}).get("last_command")
+    bot_user = db.users.find_one({"chat_id": chat_id})
+    last_command = bot_user["last_command"] if bot_user != None else None
     if last_command == "add_stack":
-        stack = [i.strip().lower() for i in update.message.text.split(",")]
+        stack = [i.strip().lower()
+                 for i in update.message.text.split(",") if i.strip() != ""]
         for i in stack:
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         db.user_stack.insert_many(
@@ -111,6 +120,7 @@ def echo(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
+    time.sleep(0.035)
 
 
 start_handler = CommandHandler("start", start)
