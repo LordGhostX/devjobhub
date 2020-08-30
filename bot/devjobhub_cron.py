@@ -9,9 +9,12 @@ config = json.load(open("config.json"))
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
 bot = telegram.Bot(token=config["token"])
+testing = False
 
 
 def send_job_to_users(description, tags, job_message):
+    if testing:
+        return
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
