@@ -27,7 +27,7 @@ def start(update, context):
         db.users.insert_one(
             {"chat_id": chat_id, "last_command": None, "active": True, "date": datetime.datetime.now()})
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]))
+        chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]), parse_mode="Markdown", disable_web_page_preview="True")
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
@@ -49,7 +49,7 @@ def view_stack(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["empty_stack"])
     else:
-        stack = [i["stack"] for i in stack]
+        stack = [i["stack"].capitalize() for i in stack]
         stack_message = config["messages"]["stack"].format(
             ", ".join(stack))
         context.bot.send_message(
@@ -75,7 +75,7 @@ def remove_stack(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["empty_stack"])
     else:
-        stack = [i["stack"] for i in stack]
+        stack = [i["stack"].capitalize() for i in stack]
         stack_message = config["messages"]["remove_stack"].format(
             ", ".join(stack))
         context.bot.send_message(
@@ -93,10 +93,10 @@ def stats(update, context):
     total_stack = db.user_stack.count_documents({})
     stack_stats = ""
     for i in list(db.user_stack.aggregate([{"$group": {"_id": "$stack", "count": {"$sum": 1}}}, {"$sort": {"count": -1}}, {"$limit": 10}])):
-        stack_stats += "{} - {:.2f}%\n".format(i["_id"],
+        stack_stats += "{} - {:.2f}%\n".format(i["_id"].capitalize(),
                                                i["count"] / total_stack * 100)
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")))
+        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")), parse_mode="Markdown")
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
     time.sleep(0.035)
 
