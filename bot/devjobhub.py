@@ -25,7 +25,8 @@ def start(update, context):
     chat_id = update.effective_chat.id
     if not db.users.find_one({"chat_id": chat_id}):
         db.users.insert_one(
-            {"chat_id": chat_id, "last_command": None, "active": True, "admin": False, "date": datetime.datetime.now()})
+            {"chat_id": chat_id, "last_command": None, "admin": False, "date": datetime.datetime.now()})
+    db.users.update_one({"chat_id": user}, {"$set": {"active": True}})
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]), parse_mode="Markdown", disable_web_page_preview="True")
     context.bot.send_message(

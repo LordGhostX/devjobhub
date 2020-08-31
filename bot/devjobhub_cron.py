@@ -9,22 +9,24 @@ config = json.load(open("config.json"))
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
 bot = telegram.Bot(token=config["token"])
-testing = False
 
 
 def send_job_to_users(description, tags, job_message):
-    if testing:
-        return
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
                    or i in tags]
     users = set([i["chat_id"]
                  for i in db.user_stack.find({"stack": {"$in": valid_stack + ["all"]}})])
-    for user in users:
+    valid_users = db.users.find({"active": True, "chat_id": {"$in": users}})
+    for user in valid_users:
         try:
-            bot.send_message(user, job_message)
-        except:
+            bot.send_message(
+                user, job_message, parse_mode="Markdown", disable_web_page_preview="True")
+        except Exception as e:
+            if str(e) == "Forbidden: bot was blocked by the user":
+                db.users.update_one({"chat_id": user}, {
+                                    "$set": {"active": False}})
             pass
         time.sleep(0.035)
 
