@@ -9,9 +9,12 @@ config = json.load(open("config.json"))
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
 bot = telegram.Bot(token=config["token"])
+testing = False
 
 
 def send_job_to_users(description, tags, job_message):
+    if testing:
+        return
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
@@ -144,15 +147,18 @@ def github():
 
 
 if __name__ == "__main__":
-    print("Scraping weworkremotely...")
-    weworkremotely()
-    print("Scraping remoteok...")
-    remoteok()
-    print("Scraping employremotely...")
-    employremotely()
-    print("Scraping remotive...")
-    remotive()
-    print("Scraping stackoverflow jobs...")
-    stackoverflow()
-    print("Scraping github jobs...")
-    github()
+    while True:
+        print("Scraping weworkremotely...")
+        weworkremotely()
+        print("Scraping remoteok...")
+        remoteok()
+        print("Scraping employremotely...")
+        employremotely()
+        print("Scraping remotive...")
+        remotive()
+        print("Scraping stackoverflow jobs...")
+        stackoverflow()
+        print("Scraping github jobs...")
+        github()
+        print("Taking a nap...")
+        time.sleep(60 * 60 * 4)
