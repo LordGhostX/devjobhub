@@ -110,6 +110,20 @@ def donate(update, context):
     time.sleep(0.035)
 
 
+def broadcast(update, context):
+    chat_id = update.effective_chat.id
+    admin_status = db.users.find_one({"chat_id": chat_id, "admin": True})
+    if admin_status:
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["broadcast"].format(db.users.count_documents({})))
+        db.users.update_one({"chat_id": chat_id}, {
+                            "$set": {"last_command": "broadcast"}})
+        time.sleep(0.035)
+    else:
+        db.users.update_one({"chat_id": chat_id}, {
+                            "$set": {"last_command": None}})
+
+
 def echo(update, context):
     chat_id = update.effective_chat.id
     bot_user = db.users.find_one({"chat_id": chat_id})
@@ -132,6 +146,18 @@ def echo(update, context):
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["updated_stack"])
+    elif last_command == "broadcast":
+        all_users = db.users.find({})
+        for user in all_users:
+            try:
+                bot.send_message(
+                    user["chat_id"], update.message.text, parse_mode="Markdown", disable_web_page_preview="True")
+            except Exception as e:
+                if str(e) == "Forbidden: bot was blocked by the user":
+                    db.users.update_one({"chat_id": user}, {
+                                        "$set": {"active": False}})
+                pass
+            time.sleep(0.035)
     else:
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
@@ -146,6 +172,7 @@ donate_handler = CommandHandler("donate", donate)
 view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 remove_stack_handler = CommandHandler("remove_stack", remove_stack)
+broadcast_handler = CommandHandler("broadcast", broadcast)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 
 dispatcher.add_handler(start_handler)
@@ -155,6 +182,7 @@ dispatcher.add_handler(stats_handler)
 dispatcher.add_handler(view_stack_handler)
 dispatcher.add_handler(add_stack_handler)
 dispatcher.add_handler(remove_stack_handler)
+dispatcher.add_handler(broadcast_handler)
 dispatcher.add_handler(echo_handler)
 
 updater.start_polling()
