@@ -18,14 +18,15 @@ def send_job_to_users(description, tags, job_message):
                    or i in tags]
     users = set([i["chat_id"]
                  for i in db.user_stack.find({"stack": {"$in": valid_stack + ["all"]}})])
-    valid_users = db.users.find({"active": True, "chat_id": {"$in": users}})
+    valid_users = db.users.find(
+        {"active": True, "chat_id": {"$in": list(users)}})
     for user in valid_users:
         try:
             bot.send_message(
-                user, job_message, parse_mode="Markdown", disable_web_page_preview="True")
+                user["chat_id"], job_message, parse_mode="Markdown", disable_web_page_preview="True")
         except Exception as e:
             if str(e) == "Forbidden: bot was blocked by the user":
-                db.users.update_one({"chat_id": user}, {
+                db.users.update_one({"chat_id": user["chat_id"]}, {
                                     "$set": {"active": False}})
             pass
         time.sleep(0.035)

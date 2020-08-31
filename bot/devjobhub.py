@@ -26,7 +26,7 @@ def start(update, context):
     if not db.users.find_one({"chat_id": chat_id}):
         db.users.insert_one(
             {"chat_id": chat_id, "last_command": None, "admin": False, "date": datetime.datetime.now()})
-    db.users.update_one({"chat_id": user}, {"$set": {"active": True}})
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"active": True}})
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]), parse_mode="Markdown", disable_web_page_preview="True")
     context.bot.send_message(
@@ -146,19 +146,27 @@ def echo(update, context):
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["updated_stack"])
-    elif last_command == "broadcast":
-        all_users = db.users.find({})
+    elif last_command == "broadcast" and bot_user["admin"]:
+        all_users = db.users.find({"active": True})
+        total_delivered = 0
         for user in all_users:
             try:
-                bot.send_message(
-                    user["chat_id"], update.message.text, parse_mode="Markdown", disable_web_page_preview="True")
+                context.bot.send_message(
+                    chat_id=user["chat_id"], text=update.message.text, parse_mode="Markdown", disable_web_page_preview="True")
+                total_delivered += 1
             except Exception as e:
                 if str(e) == "Forbidden: bot was blocked by the user":
-                    db.users.update_one({"chat_id": user}, {
+                    db.users.update_one({"chat_id": user["chat_id"]}, {
                                         "$set": {"active": False}})
                 pass
             time.sleep(0.035)
+        users_count = db.users.count_documents({})
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["finished_broadcast"].format(users_count, total_delivered, total_delivered / users_count * 100))
     else:
+        if bot_user["admin"]:
+            context.bot.send_message(
+                chat_id=chat_id, text=update.message.text, parse_mode="Markdown", disable_web_page_preview="True")
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
