@@ -17,6 +17,10 @@ def send_job_to_users(description, tags, job_message, job_url, markup=None):
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
                    or i in tags]
+    job_stack = [{"job_url": job_url, "stack": i}
+                 for i in valid_stack if i != "all"]
+    if job_stack != []:
+        db.job_stack.insert_many(job_stack)
     users = set([i["chat_id"]
                  for i in db.user_stack.find({"stack": {"$in": valid_stack + ["all"]}})])
     valid_users = db.users.find(
