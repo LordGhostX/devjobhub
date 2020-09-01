@@ -23,7 +23,8 @@ def send_job_to_users(description, tags, job_message):
     for user in valid_users:
         try:
             bot.send_message(
-                user["chat_id"], job_message, disable_web_page_preview="True")
+                user["chat_id"], job_message, parse_mode="HTML",
+                disable_web_page_preview="True")
         except Exception as e:
             if str(e) == "Forbidden: bot was blocked by the user":
                 db.users.update_one({"chat_id": user["chat_id"]}, {
@@ -85,7 +86,7 @@ def employremotely():
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
-            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ Deadline: {}\n".format(job["details"]["deadline"]), job["info"]["href"])
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "<b>⏰ Deadline:</b> {}\n".format(job["details"]["deadline"]), job["info"]["href"])
         send_job_to_users(job["details"]["description"],
                           job["details"]["tags"], job_message)
 
@@ -170,7 +171,7 @@ def remoteco():
 if __name__ == "__main__":
     while True:
         print("Scraping weworkremotely...")
-        weworkremotely()
+       # weworkremotely()
         print("Scraping remoteok...")
         remoteok()
         print("Scraping employremotely...")
@@ -185,3 +186,4 @@ if __name__ == "__main__":
         remoteco()
         print("Taking a nap...")
         time.sleep(config["scrape_interval"] * 60)
+
