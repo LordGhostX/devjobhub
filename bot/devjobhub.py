@@ -166,6 +166,8 @@ def echo(update, context):
         for i in db.job_stack.aggregate(pipeline):
             jobs += "Role: {}\nLink: {}\nDate Posted: {}\n\n".format(
                 i["job_role"], i["job_url"], "{}/{}/{}".format(i["date"].day, i["date"].month, i["date"].year))
+        if jobs == "":
+            jobs = "Unfortunately, no jobs were found for your desired stack. Please try another keyword"
         context.bot.send_message(
             chat_id=chat_id, text=jobs, disable_web_page_preview="True")
     elif last_command == "broadcast" and bot_user["admin"]:
