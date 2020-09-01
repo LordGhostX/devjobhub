@@ -23,7 +23,7 @@ def send_job_to_users(description, tags, job_message):
     for user in valid_users:
         try:
             bot.send_message(
-                user["chat_id"], job_message, parse_mode="Markdown", disable_web_page_preview="True")
+                user["chat_id"], job_message, disable_web_page_preview="True")
         except Exception as e:
             if str(e) == "Forbidden: bot was blocked by the user":
                 db.users.update_one({"chat_id": user["chat_id"]}, {

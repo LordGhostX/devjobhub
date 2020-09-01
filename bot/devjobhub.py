@@ -94,8 +94,8 @@ def stats(update, context):
     total_stack = db.user_stack.count_documents({})
     stack_stats = ""
     for i in list(db.user_stack.aggregate([{"$group": {"_id": "$stack", "count": {"$sum": 1}}}, {"$sort": {"count": -1}}, {"$limit": 10}])):
-        stack_stats += "{} - {:.2f}%\n".format(i["_id"].capitalize(),
-                                               i["count"] / total_stack * 100)
+        stack_stats += "`{}` - {:.2f}%\n".format(i["_id"].capitalize(),
+                                                 i["count"] / total_stack * 100)
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")), parse_mode="Markdown")
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
@@ -152,7 +152,7 @@ def echo(update, context):
         for user in all_users:
             try:
                 context.bot.send_message(
-                    chat_id=user["chat_id"], text=update.message.text, parse_mode="Markdown", disable_web_page_preview="True")
+                    chat_id=user["chat_id"], text=update.message.text, disable_web_page_preview="True")
                 total_delivered += 1
             except Exception as e:
                 if str(e) == "Forbidden: bot was blocked by the user":
@@ -166,7 +166,7 @@ def echo(update, context):
     else:
         if bot_user["admin"]:
             context.bot.send_message(
-                chat_id=chat_id, text=update.message.text, parse_mode="Markdown", disable_web_page_preview="True")
+                chat_id=chat_id, text=update.message.text, disable_web_page_preview="True")
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
