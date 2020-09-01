@@ -176,6 +176,7 @@ def remoteco():
 
 if __name__ == "__main__":
     while True:
+        start = time.time()
         print("Scraping weworkremotely...")
         weworkremotely()
         print("Scraping remoteok...")
@@ -190,5 +191,6 @@ if __name__ == "__main__":
         github()
         print("Scraping remoteco...")
         remoteco()
-        print("Taking a nap...")
+        print("Taking a nap... Scrape took {} seconds".format(
+            int(time.time() - start)))
         time.sleep(config["scrape_interval"] * 60)
