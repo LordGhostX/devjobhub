@@ -1,4 +1,5 @@
 import datetime
+import logging
 import time
 import string
 import json
@@ -13,6 +14,8 @@ updater = Updater(
 dispatcher = updater.dispatcher
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 def parse_stack(stack):
