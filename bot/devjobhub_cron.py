@@ -12,7 +12,7 @@ db = client[config["db"]["db_name"]]
 bot = telegram.Bot(token=config["token"])
 
 
-def send_job_to_users(description, tags, job_message, urll, mark=None):
+def send_job_to_users(description, tags, job_message, job_url, markup=None):
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
@@ -23,16 +23,13 @@ def send_job_to_users(description, tags, job_message, urll, mark=None):
         {"active": True, "chat_id": {"$in": list(users)}})
     for user in valid_users:
         try:
-            mark= [[InlineKeyboardButton("Apply", url=urll)]]
+            markup = [[InlineKeyboardButton("Apply", url=job_url)]]
             bot.send_message(
-                user["chat_id"], job_message, parse_mode="HTML",
-                disable_web_page_preview="True",
-                reply_markup=InlineKeyboardMarkup(mark))
+                user["chat_id"], job_message, parse_mode="HTML", disable_web_page_preview="True", reply_markup=InlineKeyboardMarkup(markup))
         except Exception as e:
             if str(e) == "Forbidden: bot was blocked by the user":
                 db.users.update_one({"chat_id": user["chat_id"]}, {
                                     "$set": {"active": False}})
-            pass
 
 
 def weworkremotely():
@@ -51,8 +48,8 @@ def weworkremotely():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "", job["info"]["href"])
-        send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message, job["info"]["href"])
+        send_job_to_users(job["details"]["description"], job["details"]
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def remoteok():
@@ -70,8 +67,8 @@ def remoteok():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["info"]["tags"]), "", job["info"]["href"])
-        send_job_to_users(job["info"]["description"],
-                          job["info"]["tags"], job_message, job["info"]["href"])
+        send_job_to_users(job["info"]["description"], job["info"]
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def employremotely():
@@ -90,8 +87,8 @@ def employremotely():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ <b>Deadline:</b> {}\n".format(job["details"]["deadline"]), job["info"]["href"])
-        send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message, job["info"]["href"])
+        send_job_to_users(job["details"]["description"], job["details"]
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def remotive():
@@ -110,8 +107,8 @@ def remotive():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
-        send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message, job["info"]["href"])
+        send_job_to_users(job["details"]["description"], job["details"]
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def stackoverflow():
@@ -130,9 +127,8 @@ def stackoverflow():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
-        send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message,
-                          job["info"]["href"])
+        send_job_to_users(job["details"]["description"], job["details"]
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def github():
@@ -150,8 +146,8 @@ def github():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], "None", "", job["info"]["href"])
-        send_job_to_users(job["info"]["description"], [], job_message,
-                          job["info"]["href"])
+        send_job_to_users(job["info"]["description"], [],
+                          job_message, job["info"]["href"])
 
 
 def remoteco():
@@ -170,8 +166,8 @@ def remoteco():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["details"]["location"], "Not Specified", "None", "", job["info"]["href"])
-        send_job_to_users(job["details"]["description"], [], job_message,
-                          job["info"]["href"])
+        send_job_to_users(job["details"]["description"],
+                          [], job_message, job["info"]["href"])
 
 
 if __name__ == "__main__":
@@ -191,6 +187,6 @@ if __name__ == "__main__":
         github()
         print("Scraping remoteco...")
         remoteco()
-        print("Taking a nap... Scrape took {} seconds".format(
+        print("Taking a nap... Scraping took {} seconds".format(
             int(time.time() - start)))
         time.sleep(config["scrape_interval"] * 60)
