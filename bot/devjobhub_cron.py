@@ -4,6 +4,7 @@ import datetime
 import pymongo
 import telegram
 import scraper
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 config = json.load(open("config.json"))
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
@@ -11,7 +12,7 @@ db = client[config["db"]["db_name"]]
 bot = telegram.Bot(token=config["token"])
 
 
-def send_job_to_users(description, tags, job_message):
+def send_job_to_users(description, tags, job_message, urll, mark=None):
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
@@ -22,8 +23,11 @@ def send_job_to_users(description, tags, job_message):
         {"active": True, "chat_id": {"$in": list(users)}})
     for user in valid_users:
         try:
+            mark= [[InlineKeyboardButton("Apply", url=urll)]]
             bot.send_message(
-                user["chat_id"], job_message, disable_web_page_preview="True")
+                user["chat_id"], job_message, parse_mode="HTML",
+                disable_web_page_preview="True",
+                reply_markup=InlineKeyboardMarkup(mark))
         except Exception as e:
             if str(e) == "Forbidden: bot was blocked by the user":
                 db.users.update_one({"chat_id": user["chat_id"]}, {
@@ -48,7 +52,7 @@ def weworkremotely():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message)
+                          job["details"]["tags"], job_message, job["info"]["href"])
 
 
 def remoteok():
@@ -67,7 +71,7 @@ def remoteok():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["info"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["info"]["description"],
-                          job["info"]["tags"], job_message)
+                          job["info"]["tags"], job_message, job["info"]["href"])
 
 
 def employremotely():
@@ -85,9 +89,9 @@ def employremotely():
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
-            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ Deadline: {}\n".format(job["details"]["deadline"]), job["info"]["href"])
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ <b>Deadline:</b> {}\n".format(job["details"]["deadline"]), job["info"]["href"])
         send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message)
+                          job["details"]["tags"], job_message, job["info"]["href"])
 
 
 def remotive():
@@ -107,7 +111,7 @@ def remotive():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message)
+                          job["details"]["tags"], job_message, job["info"]["href"])
 
 
 def stackoverflow():
@@ -127,7 +131,8 @@ def stackoverflow():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
-                          job["details"]["tags"], job_message)
+                          job["details"]["tags"], job_message,
+                          job["info"]["href"])
 
 
 def github():
@@ -145,7 +150,8 @@ def github():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], "None", "", job["info"]["href"])
-        send_job_to_users(job["info"]["description"], [], job_message)
+        send_job_to_users(job["info"]["description"], [], job_message,
+                          job["info"]["href"])
 
 
 def remoteco():
@@ -164,7 +170,8 @@ def remoteco():
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["details"]["location"], "Not Specified", "None", "", job["info"]["href"])
-        send_job_to_users(job["details"]["description"], [], job_message)
+        send_job_to_users(job["details"]["description"], [], job_message,
+                          job["info"]["href"])
 
 
 if __name__ == "__main__":
