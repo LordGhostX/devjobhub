@@ -148,6 +148,25 @@ def github():
         send_job_to_users(job["info"]["description"], [], job_message)
 
 
+def remoteco():
+    jobs = []
+    for job in scraper.remoteco_jobs():
+        if not db.jobs.find_one({"href": job["href"]}):
+            try:
+                jobs.append({
+                    "info": job,
+                    "details": scraper.remoteco_info(job["href"])
+                })
+            except:
+                pass
+    for job in jobs:
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
+        job_message = config["messages"]["job_message"].format(
+            job["info"]["role"], job["info"]["company"], job["details"]["location"], "Not Specified", "None", "", job["info"]["href"])
+        send_job_to_users(job["details"]["description"], [], job_message)
+
+
 if __name__ == "__main__":
     while True:
         print("Scraping weworkremotely...")
@@ -162,5 +181,7 @@ if __name__ == "__main__":
         stackoverflow()
         print("Scraping github jobs...")
         github()
+        print("Scraping remoteco...")
+        remoteco()
         print("Taking a nap...")
         time.sleep(config["scrape_interval"] * 60)

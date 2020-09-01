@@ -6,7 +6,7 @@
     "db_name": "devjobhub"
   },
   "messages": {
-    "start": "`Hi {}`, Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\n• [We Work Remotely](weworkremotely.com)\n• [RemoteOK](remoteok.io)\n• [Employ Remotely](employremotely.com)\n• [Remotive](remotive.io)\n• [Stack Overflow](stackoverflow.com)\n• [GitHub](jobs.github.com)\n\nMade with ❤️ in 🇳🇬",
+    "start": "`Hi {}`, Welcome to Developers Job Hub Bot! 🤖\n\nI provide personalised developer job listings based on your programming stack straight to your DM with ease after scraping and exploring the web 😊🚀\n\nAll jobs are gotten from\n• [We Work Remotely](weworkremotely.com)\n• [RemoteOK](remoteok.io)\n• [Employ Remotely](employremotely.com)\n• [Remotive](remotive.io)\n• [Stack Overflow](stackoverflow.com)\n• [GitHub Jobs](jobs.github.com)\n• [RemoteCo](remoteco.com)\n\nMade with ❤️ in 🇳🇬",
     "menu": "What do you wanna do today 🤗\n\n/view_stack 👀\n/add_stack 😏\n/remove_stack 😱\n/donate 💰\n/stats ⚙️",
     "empty_stack": "You have not told us your stack, get started with /add_stack 😏",
     "stack": "Your programming stack are as follows\n\n{}\n\nAdd more with /add_stack 😏 or remove with /remove_stack 😱",
