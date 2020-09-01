@@ -12,12 +12,12 @@ db = client[config["db"]["db_name"]]
 bot = telegram.Bot(token=config["token"])
 
 
-def send_job_to_users(description, tags, job_message, job_url, markup=None):
+def send_job_to_users(description, tags, job_message, job_url, job_role, markup=None):
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
                    or i in tags]
-    job_stack = [{"job_url": job_url, "stack": i}
+    job_stack = [{"job_url": job_url, "job_role": job_role, "stack": i, "date": datetime.datetime.now()}
                  for i in valid_stack if i != "all"]
     if job_stack != []:
         db.job_stack.insert_many(job_stack)
@@ -53,7 +53,7 @@ def weworkremotely():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"])
+                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
 
 
 def remoteok():
@@ -72,7 +72,7 @@ def remoteok():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["info"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["info"]["description"], job["info"]
-                          ["tags"], job_message, job["info"]["href"])
+                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
 
 
 def employremotely():
@@ -92,7 +92,7 @@ def employremotely():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ <b>Deadline:</b> {}\n".format(job["details"]["deadline"]), job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"])
+                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
 
 
 def remotive():
@@ -112,7 +112,7 @@ def remotive():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"])
+                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
 
 
 def stackoverflow():
@@ -132,7 +132,7 @@ def stackoverflow():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"])
+                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
 
 
 def github():
@@ -151,7 +151,7 @@ def github():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], "None", "", job["info"]["href"])
         send_job_to_users(job["info"]["description"], [],
-                          job_message, job["info"]["href"])
+                          job_message, job["info"]["href"], job["info"]["role"])
 
 
 def remoteco():
@@ -171,7 +171,7 @@ def remoteco():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["details"]["location"], "Not Specified", "None", "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
-                          [], job_message, job["info"]["href"])
+                          [], job_message, job["info"]["href"], job["info"]["role"])
 
 
 if __name__ == "__main__":

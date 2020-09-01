@@ -85,6 +85,15 @@ def remove_stack(update, context):
                             "$set": {"last_command": last_command}})
 
 
+def get_random(update, context):
+    chat_id = update.effective_chat.id
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["get_random"])
+    last_command = "get_random"
+    db.users.update_one({"chat_id": chat_id}, {
+                        "$set": {"last_command": last_command}})
+
+
 def stats(update, context):
     chat_id = update.effective_chat.id
     total_users = db.users.count_documents({})
@@ -149,6 +158,16 @@ def echo(update, context):
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["updated_stack"])
+    elif last_command == "get_random":
+        stack = update.message.text.strip().lower()
+        pipeline = [{"$match": {"date": {"$gte": datetime.datetime.now(
+        ) - datetime.timedelta(days=14)}, "stack": stack}}, {"$sample": {"size": 10}}]
+        jobs = ""
+        for i in db.job_stack.aggregate(pipeline):
+            jobs += "Role: {}\nLink: {}\nDate Posted: {}\n\n".format(
+                i["job_role"], i["job_url"], "{}/{}/{}".format(i["date"].day, i["date"].month, i["date"].year))
+        context.bot.send_message(
+            chat_id=chat_id, text=jobs, disable_web_page_preview="True")
     elif last_command == "broadcast" and bot_user["admin"]:
         all_users = db.users.find({"active": True})
         total_delivered = 0
@@ -182,6 +201,7 @@ donate_handler = CommandHandler("donate", donate)
 view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 remove_stack_handler = CommandHandler("remove_stack", remove_stack)
+get_random_handler = CommandHandler("get_random", get_random)
 broadcast_handler = CommandHandler("broadcast", broadcast)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 
@@ -192,6 +212,7 @@ dispatcher.add_handler(stats_handler)
 dispatcher.add_handler(view_stack_handler)
 dispatcher.add_handler(add_stack_handler)
 dispatcher.add_handler(remove_stack_handler)
+dispatcher.add_handler(get_random_handler)
 dispatcher.add_handler(broadcast_handler)
 dispatcher.add_handler(echo_handler)
 

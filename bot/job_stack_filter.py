@@ -27,7 +27,7 @@ for i in db.jobs.find({}):
     job_url = i["href"]
     valid_stack = [i for i in all_stack if i in description.lower()
                    or i in tags]
-    job_stack = [{"job_url": job_url, "stack": i}
-                 for i in valid_stack if i != "all"]
+    job_stack = [{"job_url": job_url, "job_role": i["info"]
+                  ["role"], "stack": j, "date": i["date"]} for j in valid_stack if j != "all"]
     if job_stack != []:
         db.job_stack.insert_many(job_stack)
