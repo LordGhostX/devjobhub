@@ -32,7 +32,6 @@ def start(update, context):
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def menu(update, context):
@@ -40,7 +39,6 @@ def menu(update, context):
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def view_stack(update, context):
@@ -56,7 +54,6 @@ def view_stack(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=stack_message)
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def add_stack(update, context):
@@ -66,7 +63,6 @@ def add_stack(update, context):
     last_command = "add_stack"
     db.users.update_one({"chat_id": chat_id}, {
                         "$set": {"last_command": last_command}})
-    time.sleep(0.035)
 
 
 def remove_stack(update, context):
@@ -84,7 +80,6 @@ def remove_stack(update, context):
         last_command = "remove_stack"
         db.users.update_one({"chat_id": chat_id}, {
                             "$set": {"last_command": last_command}})
-    time.sleep(0.035)
 
 
 def stats(update, context):
@@ -99,7 +94,6 @@ def stats(update, context):
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")), parse_mode="Markdown")
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def donate(update, context):
@@ -107,7 +101,6 @@ def donate(update, context):
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["donate"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def broadcast(update, context):
@@ -118,7 +111,7 @@ def broadcast(update, context):
             chat_id=chat_id, text=config["messages"]["broadcast"].format(db.users.count_documents({})))
         db.users.update_one({"chat_id": chat_id}, {
                             "$set": {"last_command": "broadcast"}})
-        time.sleep(0.035)
+
     else:
         db.users.update_one({"chat_id": chat_id}, {
                             "$set": {"last_command": None}})
@@ -159,7 +152,7 @@ def echo(update, context):
                     db.users.update_one({"chat_id": user["chat_id"]}, {
                                         "$set": {"active": False}})
                 pass
-            time.sleep(0.035)
+
         users_count = db.users.count_documents({})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["finished_broadcast"].format(users_count, total_delivered, total_delivered / users_count * 100))
@@ -170,7 +163,6 @@ def echo(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 start_handler = CommandHandler("start", start)

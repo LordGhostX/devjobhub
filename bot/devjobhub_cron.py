@@ -29,7 +29,6 @@ def send_job_to_users(description, tags, job_message):
                 db.users.update_one({"chat_id": user["chat_id"]}, {
                                     "$set": {"active": False}})
             pass
-        time.sleep(0.035)
 
 
 def weworkremotely():
@@ -164,4 +163,4 @@ if __name__ == "__main__":
         print("Scraping github jobs...")
         github()
         print("Taking a nap...")
-        time.sleep(60 * 60 * 4)
+        time.sleep(config["scrape_interval"] * 60)
