@@ -5,8 +5,6 @@ config = json.load(open("config.json"))
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
 
-db.job_stack.delete_many({})
-
 all_stack = [i["_id"]
              for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
 for i in db.jobs.find({}):
@@ -24,10 +22,6 @@ for i in db.jobs.find({}):
                 tags = []
         else:
             tags = []
-    job_url = i["href"]
-    valid_stack = [i for i in all_stack if i in description.lower()
-                   or i in tags]
-    job_stack = [{"job_url": job_url, "job_role": i["info"]
-                  ["role"], "stack": j, "date": i["date"]} for j in valid_stack if j != "all"]
-    if job_stack != []:
-        db.job_stack.insert_many(job_stack)
+    valid_stack = list(
+        set([i for i in all_stack if i in description.lower() or i in tags] + ["all"]))
+    db.jobs.update_one({"href": i["href"]}, {"$set": {"stacks": valid_stack}})

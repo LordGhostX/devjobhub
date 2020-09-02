@@ -23,17 +23,15 @@ def send_job_listing(args):
                                 "$set": {"active": False}})
 
 
-def send_job_to_users(description, tags, job_message, job_url, job_role):
+def send_job_to_users(description, tags, job_message, job_url):
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
-    valid_stack = [i for i in all_stack if i in description.lower()
-                   or i in tags]
-    job_stack = [{"job_url": job_url, "job_role": job_role, "stack": i, "date": datetime.datetime.now()}
-                 for i in valid_stack if i != "all"]
-    if job_stack != []:
-        db.job_stack.insert_many(job_stack)
+    valid_stack = list(set([i for i in all_stack if i in description.lower()
+                            or i in tags] + ["all"]))
+    db.jobs.update_one({"href": job_url}, {
+                       "$set": {"stacks": valid_stack}})
     users = set([i["chat_id"]
-                 for i in db.user_stack.find({"stack": {"$in": valid_stack + ["all"]}})])
+                 for i in db.user_stack.find({"stack": {"$in": valid_stack}})])
     valid_users = db.users.find(
         {"active": True, "chat_id": {"$in": list(users)}})
     markup = [[InlineKeyboardButton("Apply", url=job_url)]]
@@ -59,7 +57,7 @@ def weworkremotely():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def remoteok():
@@ -78,7 +76,7 @@ def remoteok():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["info"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["info"]["description"], job["info"]
-                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def employremotely():
@@ -98,7 +96,7 @@ def employremotely():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], ", ".join(job["details"]["tags"]), "⏰ <b>Deadline:</b> {}\n".format(job["details"]["deadline"]), job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def remotive():
@@ -118,7 +116,7 @@ def remotive():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def stackoverflow():
@@ -138,7 +136,7 @@ def stackoverflow():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
         send_job_to_users(job["details"]["description"], job["details"]
-                          ["tags"], job_message, job["info"]["href"], job["info"]["role"])
+                          ["tags"], job_message, job["info"]["href"])
 
 
 def github():
@@ -157,7 +155,7 @@ def github():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], "None", "", job["info"]["href"])
         send_job_to_users(job["info"]["description"], [],
-                          job_message, job["info"]["href"], job["info"]["role"])
+                          job_message, job["info"]["href"])
 
 
 def remoteco():
@@ -177,7 +175,7 @@ def remoteco():
         job_message = config["messages"]["job_message"].format(
             job["info"]["role"], job["info"]["company"], job["details"]["location"], "Not Specified", "None", "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
-                          [], job_message, job["info"]["href"], job["info"]["role"])
+                          [], job_message, job["info"]["href"])
 
 
 if __name__ == "__main__":

@@ -173,14 +173,14 @@ def echo(update, context):
             chat_id=chat_id, text=config["messages"]["updated_stack"])
     elif last_command == "get_random":
         stack = update.message.text.strip().lower()
-        pipeline = [{"$match": {"date": {"$gte": datetime.datetime.now(
-        ) - datetime.timedelta(days=14)}, "stack": stack}}, {"$sample": {"size": 10}}]
+        pipeline = [{"$match": {"date": {"$gte": datetime.datetime.now() - datetime.timedelta(
+            days=14)}, "stacks": {"$in": [stack]}}}, {"$sample": {"size": 10}}]
         jobs = ""
-        for i in db.job_stack.aggregate(pipeline):
+        for i in db.jobs.aggregate(pipeline):
             jobs += "Role: {}\nLink: {}\nDate Posted: {}\n\n".format(
-                i["job_role"], i["job_url"], "{}/{}/{}".format(i["date"].day, i["date"].month, i["date"].year))
+                i["info"]["role"], i["href"], "{}/{}/{}".format(i["date"].day, i["date"].month, i["date"].year))
         if jobs == "":
-            jobs = "Unfortunately, no jobs were found for your desired stack. Please try another keyword"
+            jobs = "Unfortunately, no jobs were found for your desired stack. Please try another keyword 😞"
         context.bot.send_message(
             chat_id=chat_id, text=jobs, disable_web_page_preview="True")
     elif last_command == "broadcast":
