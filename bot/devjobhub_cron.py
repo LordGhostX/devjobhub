@@ -1,10 +1,11 @@
 import json
 import time
 import datetime
+from multiprocessing import Pool
 import pymongo
 import telegram
-import scraper
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+import scraper
 
 config = json.load(open("config.json"))
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
@@ -12,7 +13,17 @@ db = client[config["db"]["db_name"]]
 bot = telegram.Bot(token=config["token"])
 
 
-def send_job_to_users(description, tags, job_message, job_url, job_role, markup=None):
+def send_job_listing(args):
+    try:
+        bot.send_message(args[0], args[1], parse_mode="HTML",
+                         disable_web_page_preview="True", reply_markup=InlineKeyboardMarkup(args[2]))
+    except Exception as e:
+        if str(e) == "Forbidden: bot was blocked by the user":
+            db.users.update_one({"chat_id": args[0]}, {
+                                "$set": {"active": False}})
+
+
+def send_job_to_users(description, tags, job_message, job_url, job_role):
     all_stack = [i["_id"]
                  for i in db.user_stack.aggregate([{"$group": {"_id": "$stack"}}])]
     valid_stack = [i for i in all_stack if i in description.lower()
@@ -25,15 +36,10 @@ def send_job_to_users(description, tags, job_message, job_url, job_role, markup=
                  for i in db.user_stack.find({"stack": {"$in": valid_stack + ["all"]}})])
     valid_users = db.users.find(
         {"active": True, "chat_id": {"$in": list(users)}})
-    for user in valid_users:
-        try:
-            markup = [[InlineKeyboardButton("Apply", url=job_url)]]
-            bot.send_message(
-                user["chat_id"], job_message, parse_mode="HTML", disable_web_page_preview="True", reply_markup=InlineKeyboardMarkup(markup))
-        except Exception as e:
-            if str(e) == "Forbidden: bot was blocked by the user":
-                db.users.update_one({"chat_id": user["chat_id"]}, {
-                                    "$set": {"active": False}})
+    markup = [[InlineKeyboardButton("Apply", url=job_url)]]
+    with Pool(5) as p:
+        p.map(send_job_listing, [
+              [i["chat_id"], job_message, markup] for i in valid_users])
 
 
 def weworkremotely():

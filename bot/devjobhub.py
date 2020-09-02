@@ -3,12 +3,15 @@ import logging
 import time
 import string
 import json
+from multiprocessing import Pool
 import pymongo
+import telegram
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 
 config = json.load(open("config.json"))
+bot = telegram.Bot(token=config["token"])
 updater = Updater(
     token=config["token"], use_context=True)
 dispatcher = updater.dispatcher
@@ -22,6 +25,16 @@ def parse_stack(stack):
     stack = stack.strip().lower()
     accepted_chars = string.ascii_lowercase + string.digits + "-/+#. "
     return "".join([i for i in stack if i in accepted_chars])
+
+
+def send_broadcast(args):
+    try:
+        bot.send_message(chat_id=args[0], text=args[1],
+                         disable_web_page_preview="True")
+    except Exception as e:
+        if str(e) == "Forbidden: bot was blocked by the user":
+            db.users.update_one({"chat_id": args[0]}, {
+                                "$set": {"active": False}})
 
 
 def start(update, context):
@@ -170,21 +183,12 @@ def echo(update, context):
             jobs = "Unfortunately, no jobs were found for your desired stack. Please try another keyword"
         context.bot.send_message(
             chat_id=chat_id, text=jobs, disable_web_page_preview="True")
-    elif last_command == "broadcast" and bot_user["admin"]:
-        all_users = db.users.find({"active": True})
-        total_delivered = 0
-        for user in all_users:
-            try:
-                context.bot.send_message(
-                    chat_id=user["chat_id"], text=update.message.text, disable_web_page_preview="True")
-                total_delivered += 1
-            except Exception as e:
-                if str(e) == "Forbidden: bot was blocked by the user":
-                    db.users.update_one({"chat_id": user["chat_id"]}, {
-                                        "$set": {"active": False}})
-                pass
-
+    elif last_command == "broadcast":
+        with Pool(5) as p:
+            p.map(send_broadcast, [[i["chat_id"], update.message.text]
+                                   for i in db.users.find({"active": True})])
         users_count = db.users.count_documents({})
+        total_delivered = db.users.count_documents({"active": False})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["finished_broadcast"].format(users_count, total_delivered, total_delivered / users_count * 100))
     else:
