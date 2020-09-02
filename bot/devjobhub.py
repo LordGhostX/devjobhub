@@ -118,13 +118,8 @@ def stats(update, context):
         user_stack_stats += "`{}` - {:.2f}%\n".format(i["_id"].capitalize(),
                                                       i["count"] / total_job_stack * 100)
 
-    total_job_stack = db.job_stack.count_documents({})
-    job_stack_stats = ""
-    for i in list(db.job_stack.aggregate([{"$group": {"_id": "$stack", "count": {"$sum": 1}}}, {"$sort": {"count": -1}}, {"$limit": 10}])):
-        job_stack_stats += "`{}` - {:.2f}%\n".format(i["_id"].capitalize(),
-                                                     i["count"] / total_job_stack * 100)
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, user_stack_stats, job_stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")), parse_mode="Markdown")
+        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, user_stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")), parse_mode="Markdown")
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
 
 
@@ -180,7 +175,7 @@ def echo(update, context):
             jobs += "Role: {}\nLink: {}\nDate Posted: {}\n\n".format(
                 i["info"]["role"], i["href"], "{}/{}/{}".format(i["date"].day, i["date"].month, i["date"].year))
         if jobs == "":
-            jobs = "Unfortunately, no jobs were found for your desired stack. Please try another keyword 😞"
+            jobs = config["messages"]["empty_random"]
         context.bot.send_message(
             chat_id=chat_id, text=jobs, disable_web_page_preview="True")
     elif last_command == "broadcast":
