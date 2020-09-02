@@ -178,6 +178,26 @@ def remoteco():
                           [], job_message, job["info"]["href"])
 
 
+def pythonorg():
+    jobs = []
+    for job in scraper.pythonorg_jobs():
+        if not db.jobs.find_one({"href": job["href"]}):
+            try:
+                jobs.append({
+                    "info": job,
+                    "details": scraper.pythonorg_info(job["href"])
+                })
+            except:
+                pass
+    for job in jobs:
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
+        job_message = config["messages"]["job_message"].format(
+            job["info"]["role"], job["info"]["company"], job["details"]["location"], "Not Specified", ", ".join(job["info"]["tags"]), "📅 <b>Date Posted:</b> {}\n".format(job["info"]["date_posted"]), job["info"]["href"])
+        send_job_to_users(job["details"]["description"],
+                          job["info"]["tags"], job_message, job["info"]["href"])
+
+
 if __name__ == "__main__":
     while True:
         start = time.time()
@@ -195,6 +215,8 @@ if __name__ == "__main__":
         github()
         print("Scraping remoteco...")
         remoteco()
+        print("Scraping pythonorg...")
+        pythonorg()
         print("Taking a nap... Scraping took {} seconds".format(
             int(time.time() - start)))
         time.sleep(config["scrape_interval"] * 60)

@@ -262,4 +262,39 @@ def remoteco_info(href):
     }
 
 
+# In[14]:
+
+
+def pythonorg_jobs():
+    r = requests.get("https://www.python.org/jobs/")
+    page = BeautifulSoup(r.text, "html.parser")
+    job_section = page.find("ol", {"class": "list-recent-jobs"})
+
+    jobs = []
+    for job in job_section.find_all("li"):
+        jobs.append({
+            "href": "https://www.python.org" + job.find("span", {"class": "listing-company-name"}).find("a")["href"],
+            "company": job.find("span", {"class": "listing-company-name"}).text.strip().split("\n")[-1].strip(),
+            "role": job.find("span", {"class": "listing-company-name"}).find("a").text.strip(),
+            "tags": [i.strip().lower() for i in job.find("span", {"class": "listing-job-type"}).text.split(",")],
+            "date_posted": job.find("span", {"class": "listing-posted"}).text.strip()
+        })
+    return jobs
+
+
+# In[15]:
+
+
+def pythonorg_info(href):
+    r = requests.get(href)
+    page = BeautifulSoup(r.text, "html.parser")
+
+    description = page.find("div", {"class": "job-description"}).text.strip()
+    location = page.find("span", {"class": "listing-location"}).text.strip()
+    return {
+        "location": location,
+        "description": description
+    }
+
+
 # In[ ]:
