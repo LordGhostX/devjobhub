@@ -1,18 +1,24 @@
 import datetime
+import logging
 import time
 import string
 import json
+from multiprocessing import Pool
 import pymongo
+import telegram
 from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 
 config = json.load(open("config.json"))
+bot = telegram.Bot(token=config["token"])
 updater = Updater(
     token=config["token"], use_context=True)
 dispatcher = updater.dispatcher
 client = pymongo.MongoClient(config["db"]["host"], config["db"]["port"])
 db = client[config["db"]["db_name"]]
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 def parse_stack(stack):
@@ -21,17 +27,27 @@ def parse_stack(stack):
     return "".join([i for i in stack if i in accepted_chars])
 
 
+def send_broadcast(args):
+    try:
+        bot.send_message(chat_id=args[0], text=args[1],
+                         disable_web_page_preview="True")
+    except Exception as e:
+        if str(e) == "Forbidden: bot was blocked by the user":
+            db.users.update_one({"chat_id": args[0]}, {
+                                "$set": {"active": False}})
+
+
 def start(update, context):
     chat_id = update.effective_chat.id
     if not db.users.find_one({"chat_id": chat_id}):
         db.users.insert_one(
-            {"chat_id": chat_id, "last_command": None, "active": True, "date": datetime.datetime.now()})
+            {"chat_id": chat_id, "last_command": None, "admin": False, "date": datetime.datetime.now()})
+    db.users.update_one({"chat_id": chat_id}, {"$set": {"active": True}})
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]), parse_mode="Markdown", disable_web_page_preview="True")
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def menu(update, context):
@@ -39,7 +55,6 @@ def menu(update, context):
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["menu"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def view_stack(update, context):
@@ -55,7 +70,6 @@ def view_stack(update, context):
         context.bot.send_message(
             chat_id=chat_id, text=stack_message)
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def add_stack(update, context):
@@ -65,7 +79,6 @@ def add_stack(update, context):
     last_command = "add_stack"
     db.users.update_one({"chat_id": chat_id}, {
                         "$set": {"last_command": last_command}})
-    time.sleep(0.035)
 
 
 def remove_stack(update, context):
@@ -83,22 +96,31 @@ def remove_stack(update, context):
         last_command = "remove_stack"
         db.users.update_one({"chat_id": chat_id}, {
                             "$set": {"last_command": last_command}})
-    time.sleep(0.035)
+
+
+def get_random(update, context):
+    chat_id = update.effective_chat.id
+    context.bot.send_message(
+        chat_id=chat_id, text=config["messages"]["get_random"])
+    last_command = "get_random"
+    db.users.update_one({"chat_id": chat_id}, {
+                        "$set": {"last_command": last_command}})
 
 
 def stats(update, context):
     chat_id = update.effective_chat.id
     total_users = db.users.count_documents({})
     total_jobs = db.jobs.count_documents({})
-    total_stack = db.user_stack.count_documents({})
-    stack_stats = ""
+
+    total_job_stack = db.user_stack.count_documents({})
+    user_stack_stats = ""
     for i in list(db.user_stack.aggregate([{"$group": {"_id": "$stack", "count": {"$sum": 1}}}, {"$sort": {"count": -1}}, {"$limit": 10}])):
-        stack_stats += "{} - {:.2f}%\n".format(i["_id"].capitalize(),
-                                               i["count"] / total_stack * 100)
+        user_stack_stats += "`{}` - {:.2f}%\n".format(i["_id"].capitalize(),
+                                                      i["count"] / total_job_stack * 100)
+
     context.bot.send_message(
-        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")), parse_mode="Markdown")
+        chat_id=chat_id, text=config["messages"]["stats"].format(total_jobs, total_users, user_stack_stats, time.strftime("%d/%m/%Y %H:%M:%S UTC")), parse_mode="Markdown")
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 def donate(update, context):
@@ -106,7 +128,20 @@ def donate(update, context):
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["donate"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
+
+
+def broadcast(update, context):
+    chat_id = update.effective_chat.id
+    admin_status = db.users.find_one({"chat_id": chat_id, "admin": True})
+    if admin_status:
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["broadcast"].format(db.users.count_documents({})))
+        db.users.update_one({"chat_id": chat_id}, {
+                            "$set": {"last_command": "broadcast"}})
+
+    else:
+        db.users.update_one({"chat_id": chat_id}, {
+                            "$set": {"last_command": None}})
 
 
 def echo(update, context):
@@ -131,11 +166,33 @@ def echo(update, context):
             db.user_stack.delete_many({"chat_id": chat_id, "stack": i})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["updated_stack"])
+    elif last_command == "get_random":
+        stack = update.message.text.strip().lower()
+        pipeline = [{"$match": {"date": {"$gte": datetime.datetime.now() - datetime.timedelta(
+            days=14)}, "stacks": {"$in": [stack]}}}, {"$sample": {"size": 10}}]
+        jobs = ""
+        for i in db.jobs.aggregate(pipeline):
+            jobs += "Role: {}\nLink: {}\nDate Posted: {}\n\n".format(
+                i["info"]["role"], i["href"], "{}/{}/{}".format(i["date"].day, i["date"].month, i["date"].year))
+        if jobs == "":
+            jobs = config["messages"]["empty_random"]
+        context.bot.send_message(
+            chat_id=chat_id, text=jobs, disable_web_page_preview="True")
+    elif last_command == "broadcast":
+        with Pool(5) as p:
+            p.map(send_broadcast, [[i["chat_id"], update.message.text]
+                                   for i in db.users.find({"active": True})])
+        users_count = db.users.count_documents({})
+        total_delivered = db.users.count_documents({"active": False})
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["finished_broadcast"].format(users_count, total_delivered, total_delivered / users_count * 100))
     else:
+        if bot_user["admin"]:
+            context.bot.send_message(
+                chat_id=chat_id, text=update.message.text, disable_web_page_preview="True")
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["unknown"])
     db.users.update_one({"chat_id": chat_id}, {"$set": {"last_command": None}})
-    time.sleep(0.035)
 
 
 start_handler = CommandHandler("start", start)
@@ -145,6 +202,8 @@ donate_handler = CommandHandler("donate", donate)
 view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 remove_stack_handler = CommandHandler("remove_stack", remove_stack)
+get_random_handler = CommandHandler("get_random", get_random)
+broadcast_handler = CommandHandler("broadcast", broadcast)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 
 dispatcher.add_handler(start_handler)
@@ -154,6 +213,8 @@ dispatcher.add_handler(stats_handler)
 dispatcher.add_handler(view_stack_handler)
 dispatcher.add_handler(add_stack_handler)
 dispatcher.add_handler(remove_stack_handler)
+dispatcher.add_handler(get_random_handler)
+dispatcher.add_handler(broadcast_handler)
 dispatcher.add_handler(echo_handler)
 
 updater.start_polling()

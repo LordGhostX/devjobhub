@@ -36,14 +36,14 @@ def weworkremotely_info(href):
     r = requests.get(href)
     page = BeautifulSoup(r.text, "html.parser")
 
-    title = page.find(
+    role = page.find(
         "div", {"class": "listing-header-container"}).find("h1").text.strip()
     tags = [i.text.strip().lower()
             for i in page.find_all("span", {"class": "listing-tag"})]
     description = page.find(
         "div", {"id": "job-listing-show-container"}).text.strip()
     return {
-        "title": title,
+        "role": role,
         "tags": tags,
         "description": description,
         "href": href
@@ -106,7 +106,7 @@ def employremotely_info(href):
     r = requests.get(href)
     page = BeautifulSoup(r.text, "html.parser")
 
-    title = page.find("h1", {"class": "u-c--white"}).text.strip()
+    role = page.find("h1", {"class": "u-c--white"}).text.strip()
     deadline = page.find_all(
         "span", {"class": "job-header__detail"})[-1].text.strip()
     tags = [i.text.strip().lower() for i in page.find("section", {
@@ -114,7 +114,7 @@ def employremotely_info(href):
     description = page.find(
         "section", {"class": "job-information__text-block"}).text.strip()
     return {
-        "title": title,
+        "role": role,
         "tags": tags,
         "deadline": deadline[2:],
         "description": description,
@@ -156,13 +156,13 @@ def remotive_info(href):
     page = BeautifulSoup(r.text, "html.parser")
 
     company = page.find("div", {"class": "content"}).find("h2").text.strip()
-    title = page.find("div", {"class": "content"}).find("h1").text.strip()
+    role = page.find("div", {"class": "content"}).find("h1").text.strip()
     tags = [i.text.strip().lower() for i in page.find(
         "div", {"class": "job-tags"}).find_all("a", {"class": "job-tag"})]
     description = page.find("div", {"class": "job-description"}).text.strip()
     return {
         "company": company,
-        "title": title,
+        "role": role,
         "tags": tags,
         "description": description
     }
@@ -195,13 +195,13 @@ def stackoverflow_info(href):
     r = requests.get(href)
     page = BeautifulSoup(r.text, "html.parser")
 
-    title = page.find("h1", {"class": "fs-headline1 mb4"}).text.strip()
+    role = page.find("h1", {"class": "fs-headline1 mb4"}).text.strip()
     company = page.find("a", {"class": "fc-black-700"}).text.strip()
     tags = [i.text.strip().lower() for i in page.find_all("section", {"class": "mb32"})[
         1].find_all("a", {"class": "post-tag no-tag-menu"})]
     description = page.find("div", {"id": "overview-items"}).text.strip()
     return {
-        "title": title,
+        "role": role,
         "company": company,
         "tags": tags,
         "description": description
@@ -225,6 +225,76 @@ def github_jobs():
             "description": job["description"]
         })
     return jobs
+
+
+# In[12]:
+
+
+def remoteco_jobs():
+    r = requests.get("https://remote.co/remote-jobs/developer")
+    page = BeautifulSoup(r.text, "html.parser")
+    job_section = page.find_all("div", {"class": "card-body p-0"})[1]
+
+    jobs = []
+    for job in job_section.find_all("a", {"class": "card"}):
+        jobs.append({
+            "href": "https://remote.co" + job["href"],
+            "company": job.find("p", {"class": "m-0 text-secondary"}).text.strip().split("\n")[0].strip(),
+            "role": job.find("span", {"class": "font-weight-bold larger"}).text.strip()
+        })
+    return jobs
+
+
+# In[13]:
+
+
+def remoteco_info(href):
+    r = requests.get(href)
+    page = BeautifulSoup(r.text, "html.parser")
+
+    role = page.find("h1", {"class": "font-weight-bold"}).text.strip()
+    location = page.find("span", {"class": "location_sm"}).text.strip()
+    description = page.find("div", {"class": "job_description"}).text.strip()
+    return {
+        "role": role,
+        "location": location,
+        "description": description
+    }
+
+
+# In[14]:
+
+
+def pythonorg_jobs():
+    r = requests.get("https://www.python.org/jobs/")
+    page = BeautifulSoup(r.text, "html.parser")
+    job_section = page.find("ol", {"class": "list-recent-jobs"})
+
+    jobs = []
+    for job in job_section.find_all("li"):
+        jobs.append({
+            "href": "https://www.python.org" + job.find("span", {"class": "listing-company-name"}).find("a")["href"],
+            "company": job.find("span", {"class": "listing-company-name"}).text.strip().split("\n")[-1].strip(),
+            "role": job.find("span", {"class": "listing-company-name"}).find("a").text.strip(),
+            "tags": [i.strip().lower() for i in job.find("span", {"class": "listing-job-type"}).text.split(",")],
+            "date_posted": job.find("span", {"class": "listing-posted"}).text.strip()
+        })
+    return jobs
+
+
+# In[15]:
+
+
+def pythonorg_info(href):
+    r = requests.get(href)
+    page = BeautifulSoup(r.text, "html.parser")
+
+    description = page.find("div", {"class": "job-description"}).text.strip()
+    location = page.find("span", {"class": "listing-location"}).text.strip()
+    return {
+        "location": location,
+        "description": description
+    }
 
 
 # In[ ]:
