@@ -37,8 +37,8 @@ def send_job_to_users(description, tags, job_message, job_url):
     with Pool(5) as p:
         blocked_users = p.map(send_job_listing, [
             [i["chat_id"], job_message, markup] for i in valid_users])
-    db.users.update_one({"chat_id": {"$in": [i for i in blocked_users if i != None]}}, {
-                        "$set": {"active": False}})
+    db.users.update_many({"chat_id": {"$in": [i for i in blocked_users if i != None]}}, {
+                         "$set": {"active": False}})
 
 
 def weworkremotely():

@@ -194,10 +194,10 @@ def echo(update, context):
         with Pool(5) as p:
             blocked_users = p.map(send_broadcast, [
                                   [i["chat_id"], update.message.text] for i in db.users.find({"active": True})])
-        db.users.update_one({"chat_id": {"$in": [i for i in blocked_users if i != None]}}, {
-                            "$set": {"active": False}})
+        db.users.update_many({"chat_id": {"$in": [i for i in blocked_users if i != None]}}, {
+                             "$set": {"active": False}})
         users_count = db.users.count_documents({})
-        total_delivered = db.users.count_documents({"active": False})
+        total_delivered = db.users.count_documents({"active": True})
         context.bot.send_message(
             chat_id=chat_id, text=config["messages"]["finished_broadcast"].format(users_count, total_delivered, total_delivered / users_count * 100))
     else:
