@@ -40,7 +40,7 @@ def start(update, context):
     chat_id = update.effective_chat.id
     if not db.users.find_one({"chat_id": chat_id}):
         db.users.insert_one(
-            {"chat_id": chat_id, "last_command": None, "admin": False, "date": datetime.datetime.now()})
+            {"chat_id": chat_id, "last_command": None, "admin": False, "mute": False, "date": datetime.datetime.now()})
     db.users.update_one({"chat_id": chat_id}, {"$set": {"active": True}})
     context.bot.send_message(
         chat_id=chat_id, text=config["messages"]["start"].format(update["message"]["chat"]["first_name"]), parse_mode="Markdown", disable_web_page_preview="True")
@@ -143,6 +143,19 @@ def broadcast(update, context):
                             "$set": {"last_command": None}})
 
 
+def mute(update, context):
+    chat_id = update.effective_chat.id
+    bot_user = db.users.find_one({"chat_id": chat_id})
+    if bot_user["mute"]:
+        db.users.update_one({"chat_id": chat_id}, {"$set": {"mute": False}})
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["unmuted"])
+    else:
+        db.users.update_one({"chat_id": chat_id}, {"$set": {"mute": True}})
+        context.bot.send_message(
+            chat_id=chat_id, text=config["messages"]["muted"])
+
+
 def echo(update, context):
     chat_id = update.effective_chat.id
     bot_user = db.users.find_one({"chat_id": chat_id})
@@ -204,6 +217,7 @@ view_stack_handler = CommandHandler("view_stack", view_stack)
 add_stack_handler = CommandHandler("add_stack", add_stack)
 remove_stack_handler = CommandHandler("remove_stack", remove_stack)
 get_random_handler = CommandHandler("get_random", get_random)
+mute_handler = CommandHandler("mute", mute)
 broadcast_handler = CommandHandler("broadcast", broadcast)
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 
@@ -215,6 +229,7 @@ dispatcher.add_handler(view_stack_handler)
 dispatcher.add_handler(add_stack_handler)
 dispatcher.add_handler(remove_stack_handler)
 dispatcher.add_handler(get_random_handler)
+dispatcher.add_handler(mute_handler)
 dispatcher.add_handler(broadcast_handler)
 dispatcher.add_handler(echo_handler)
 

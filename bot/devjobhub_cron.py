@@ -32,7 +32,7 @@ def send_job_to_users(description, tags, job_message, job_url):
     users = set([i["chat_id"]
                  for i in db.user_stack.find({"stack": {"$in": valid_stack}})])
     valid_users = db.users.find(
-        {"active": True, "chat_id": {"$in": list(users)}})
+        {"active": True, "mute": False, "chat_id": {"$in": list(users)}})
     markup = [[InlineKeyboardButton("Apply", url=job_url)]]
     with Pool(5) as p:
         blocked_users = p.map(send_job_listing, [
@@ -112,8 +112,8 @@ def remotive():
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
-            job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
-        send_job_to_users(job["details"]["description"], job["details"]
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["info"]["tags"]), "", job["info"]["href"])
+        send_job_to_users(job["details"]["description"], job["info"]
                           ["tags"], job_message, job["info"]["href"])
 
 
@@ -132,8 +132,8 @@ def stackoverflow():
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
         job_message = config["messages"]["job_message"].format(
-            job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["details"]["tags"]), "", job["info"]["href"])
-        send_job_to_users(job["details"]["description"], job["details"]
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", ", ".join(job["info"]["tags"]), "", job["info"]["href"])
+        send_job_to_users(job["details"]["description"], job["info"]
                           ["tags"], job_message, job["info"]["href"])
 
 
