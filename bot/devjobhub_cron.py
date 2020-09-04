@@ -193,6 +193,26 @@ def pythonorg():
                           job["info"]["tags"], job_message, job["info"]["href"])
 
 
+def hackerrank():
+    jobs = []
+    for job in scraper.hackerrank_jobs():
+        if not db.jobs.find_one({"href": job["href"]}):
+            try:
+                jobs.append({
+                    "info": job,
+                    "details": scraper.hackerrank_info(job["href"])
+                })
+            except:
+                pass
+    for job in jobs:
+        db.jobs.insert_one(
+            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
+        job_message = config["messages"]["job_message"].format(
+            job["info"]["role"], job["info"]["company"], job["info"]["location"], "Not Specified", "None", "🕑 <b>Experience:</b> {}\n".format(job["info"]["experience"]), job["info"]["href"])
+        send_job_to_users(job["details"]["description"],
+                          [], job_message, job["info"]["href"])
+
+
 if __name__ == "__main__":
     while True:
         start = time.time()
@@ -212,6 +232,8 @@ if __name__ == "__main__":
         remoteco()
         print("Scraping pythonorg...")
         pythonorg()
+        print("Scraping hackerrank...")
+        hackerrank()
         print("Taking a nap... Scraping took {} seconds".format(
             int(time.time() - start)))
         time.sleep(config["scrape_interval"] * 60)

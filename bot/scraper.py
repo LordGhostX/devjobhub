@@ -8,6 +8,10 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
+headers = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0"
+}
+
 
 # In[2]:
 
@@ -46,10 +50,8 @@ def weworkremotely_info(href):
     description = page.find(
         "div", {"id": "job-listing-show-container"}).text.strip()
     return {
-        "role": role,
         "tags": tags,
-        "description": description,
-        "href": href
+        "description": description
     }
 
 
@@ -120,11 +122,9 @@ def employremotely_info(href):
     description = page.find(
         "section", {"class": "job-information__text-block"}).text.strip()
     return {
-        "role": role,
         "tags": tags,
         "deadline": deadline[2:],
-        "description": description,
-        "href": href
+        "description": description
     }
 
 
@@ -170,9 +170,6 @@ def remotive_info(href):
         "div", {"class": "job-tags"}).find_all("a", {"class": "job-tag"})]
     description = page.find("div", {"class": "job-description"}).text.strip()
     return {
-        "company": company,
-        "role": role,
-        "tags": tags,
         "description": description
     }
 
@@ -213,9 +210,6 @@ def stackoverflow_info(href):
         1].find_all("a", {"class": "post-tag no-tag-menu"})]
     description = page.find("div", {"id": "overview-items"}).text.strip()
     return {
-        "role": role,
-        "company": company,
-        "tags": tags,
         "description": description
     }
 
@@ -274,7 +268,6 @@ def remoteco_info(href):
     location = page.find("span", {"class": "location_sm"}).text.strip()
     description = page.find("div", {"class": "job_description"}).text.strip()
     return {
-        "role": role,
         "location": location,
         "description": description
     }
@@ -314,6 +307,43 @@ def pythonorg_info(href):
     location = page.find("span", {"class": "listing-location"}).text.strip()
     return {
         "location": location,
+        "description": description
+    }
+
+
+# In[16]:
+
+
+def hackerrank_jobs():
+    r = requests.get("https://www.hackerrank.com/jobs/search", headers=headers)
+    page = BeautifulSoup(r.text, "html.parser")
+    job_section = page.find("div", {"class": "jobs-list"})
+
+    jobs = []
+    for job in job_section.find_all("a", {"class": "job-card"}):
+        try:
+            jobs.append({
+                "href": "https://www.hackerrank.com" + job["href"],
+                "company": job.find("span", {"class": "job-card-company-name"}).text.strip(),
+                "role": job.find("h2").text.strip(),
+                "location": job.find("li", {"class": "job-card-field"}).text.strip(),
+                "experience": job.find_all("li", {"class": "job-card-field"})[1].text.strip()
+            })
+        except:
+            pass
+    return jobs
+
+
+# In[17]:
+
+
+def hackerrank_info(href):
+    r = requests.get(href, headers=headers)
+    page = BeautifulSoup(r.text, "html.parser")
+
+    description = page.find(
+        "div", {"class": "job-description-v2"}).text.strip()
+    return {
         "description": description
     }
 
