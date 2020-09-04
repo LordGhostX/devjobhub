@@ -33,8 +33,7 @@ def send_broadcast(args):
                          disable_web_page_preview="True")
     except Exception as e:
         if str(e) == "Forbidden: bot was blocked by the user":
-            db.users.update_one({"chat_id": args[0]}, {
-                                "$set": {"active": False}})
+            return args[0]
 
 
 def start(update, context):
@@ -180,8 +179,10 @@ def echo(update, context):
             chat_id=chat_id, text=jobs, disable_web_page_preview="True")
     elif last_command == "broadcast":
         with Pool(5) as p:
-            p.map(send_broadcast, [[i["chat_id"], update.message.text]
-                                   for i in db.users.find({"active": True})])
+            blocked_users = p.map(send_broadcast, [
+                                  [i["chat_id"], update.message.text] for i in db.users.find({"active": True})])
+        db.users.update_one({"chat_id": {"$in": [i for i in blocked_users if i != None]}}, {
+                            "$set": {"active": False}})
         users_count = db.users.count_documents({})
         total_delivered = db.users.count_documents({"active": False})
         context.bot.send_message(

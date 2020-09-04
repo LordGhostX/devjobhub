@@ -19,8 +19,7 @@ def send_job_listing(args):
                          disable_web_page_preview="True", reply_markup=InlineKeyboardMarkup(args[2]))
     except Exception as e:
         if str(e) == "Forbidden: bot was blocked by the user":
-            db.users.update_one({"chat_id": args[0]}, {
-                                "$set": {"active": False}})
+            return args[0]
 
 
 def send_job_to_users(description, tags, job_message, job_url):
@@ -36,8 +35,10 @@ def send_job_to_users(description, tags, job_message, job_url):
         {"active": True, "chat_id": {"$in": list(users)}})
     markup = [[InlineKeyboardButton("Apply", url=job_url)]]
     with Pool(5) as p:
-        p.map(send_job_listing, [
-              [i["chat_id"], job_message, markup] for i in valid_users])
+        blocked_users = p.map(send_job_listing, [
+            [i["chat_id"], job_message, markup] for i in valid_users])
+    db.users.update_one({"chat_id": {"$in": [i for i in blocked_users if i != None]}}, {
+                        "$set": {"active": False}})
 
 
 def weworkremotely():
