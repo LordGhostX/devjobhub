@@ -19,13 +19,16 @@ def weworkremotely_jobs():
 
     jobs = []
     for job in job_section.find_all("li", {"class": "feature"}):
-        jobs.append({
-            "href": "https://weworkremotely.com" + job.find_all("a")[1]["href"],
-            "company": job.find("span", {"class": "company"}).text.strip(),
-            "role": job.find("span", {"class": "title"}).text.strip(),
-            "job_type": job.find_all("span", {"class": "company"})[1].text.strip(),
-            "location": job.find("span", {"class": "region company"}).text.strip()
-        })
+        try:
+            jobs.append({
+                "href": "https://weworkremotely.com" + job.find_all("a")[1]["href"],
+                "company": job.find("span", {"class": "company"}).text.strip(),
+                "role": job.find("span", {"class": "title"}).text.strip(),
+                "job_type": job.find_all("span", {"class": "company"})[1].text.strip(),
+                "location": job.find("span", {"class": "region company"}).text.strip()
+            })
+        except:
+            pass
     return jobs
 
 
@@ -89,13 +92,16 @@ def employremotely_jobs():
 
     jobs = []
     for job in page.find_all("div", {"class": "c-job-card"}):
-        jobs.append({
-            "href": "https://www.employremotely.com" + job.find("span", {"class": "c-job-card__job-title"}).find("a")["href"],
-            "company": job.find("span", {"class": "c-job-card__company"}).text.strip(),
-            "role": job.find("span", {"class": "c-job-card__job-title"}).find("a").text.strip(),
-            "job_type": job.find("span", {"class": "c-job-card__contract-type"}).text.strip()[2:],
-            "location": job.find("span", {"class": "c-job-card__location"}).text.strip()[2:]
-        })
+        try:
+            jobs.append({
+                "href": "https://www.employremotely.com" + job.find("span", {"class": "c-job-card__job-title"}).find("a")["href"],
+                "company": job.find("span", {"class": "c-job-card__company"}).text.strip(),
+                "role": job.find("span", {"class": "c-job-card__job-title"}).find("a").text.strip(),
+                "job_type": job.find("span", {"class": "c-job-card__contract-type"}).text.strip()[2:],
+                "location": job.find("span", {"class": "c-job-card__location"}).text.strip()[2:]
+            })
+        except:
+            pass
     return jobs
 
 
@@ -132,19 +138,22 @@ def remotive_jobs():
 
     jobs = []
     for job in job_section.find_all("li"):
-        if job.find("span", {"class": "job-date--old"}):
-            continue
         try:
-            location = job.find("span", {"class": "location"}).text.strip()
+            if job.find("span", {"class": "job-date--old"}):
+                continue
+            try:
+                location = job.find("span", {"class": "location"}).text.strip()
+            except:
+                location = ""
+            jobs.append({
+                "href": "https://remotive.io" + job["data-url"],
+                "company": job.find("div", {"class": "company"}).find("span").text.strip(),
+                "role": job.find("a").text.strip(),
+                "location": location,
+                "tags": [i.text.strip().lower() for i in job.find_all("a", {"class": "job-tag"})]
+            })
         except:
-            location = ""
-        jobs.append({
-            "href": "https://remotive.io" + job["data-url"],
-            "company": job.find("div", {"class": "company"}).find("span").text.strip(),
-            "role": job.find("a").text.strip(),
-            "location": location,
-            "tags": [i.text.strip().lower() for i in job.find_all("a", {"class": "job-tag"})]
-        })
+            pass
     return jobs
 
 
@@ -178,13 +187,16 @@ def stackoverflow_jobs():
 
     jobs = []
     for job in job_section.find_all("div", {"class": "-job"}):
-        jobs.append({
-            "href": "https://stackoverflow.com" + job.find("a", {"class": "s-link"})["href"],
-            "location": job.find("span", {"class": "fc-black-500"}).text.strip(),
-            "company": job.find("h3", {"class": "fc-black-700"}).find("span").text.strip(),
-            "role": job.find("a", {"class": "s-link"})["title"],
-            "tags": [i.text.strip().lower() for i in job.find_all("a", {"class": "post-tag"})]
-        })
+        try:
+            jobs.append({
+                "href": "https://stackoverflow.com" + job.find("a", {"class": "s-link"})["href"],
+                "location": job.find("span", {"class": "fc-black-500"}).text.strip(),
+                "company": job.find("h3", {"class": "fc-black-700"}).find("span").text.strip(),
+                "role": job.find("a", {"class": "s-link"})["title"],
+                "tags": [i.text.strip().lower() for i in job.find_all("a", {"class": "post-tag"})]
+            })
+        except:
+            pass
     return jobs
 
 
@@ -216,14 +228,17 @@ def github_jobs():
 
     jobs = []
     for job in job_section:
-        jobs.append({
-            "href": job["url"],
-            "location": job["location"],
-            "role": job["title"],
-            "company": job["company"],
-            "job_type": job["type"],
-            "description": job["description"]
-        })
+        try:
+            jobs.append({
+                "href": job["url"],
+                "location": job["location"],
+                "role": job["title"],
+                "company": job["company"],
+                "job_type": job["type"],
+                "description": job["description"]
+            })
+        except:
+            pass
     return jobs
 
 
@@ -237,11 +252,14 @@ def remoteco_jobs():
 
     jobs = []
     for job in job_section.find_all("a", {"class": "card"}):
-        jobs.append({
-            "href": "https://remote.co" + job["href"],
-            "company": job.find("p", {"class": "m-0 text-secondary"}).text.strip().split("\n")[0].strip(),
-            "role": job.find("span", {"class": "font-weight-bold larger"}).text.strip()
-        })
+        try:
+            jobs.append({
+                "href": "https://remote.co" + job["href"],
+                "company": job.find("p", {"class": "m-0 text-secondary"}).text.strip().split("\n")[0].strip(),
+                "role": job.find("span", {"class": "font-weight-bold larger"}).text.strip()
+            })
+        except:
+            pass
     return jobs
 
 
@@ -272,13 +290,16 @@ def pythonorg_jobs():
 
     jobs = []
     for job in job_section.find_all("li"):
-        jobs.append({
-            "href": "https://www.python.org" + job.find("span", {"class": "listing-company-name"}).find("a")["href"],
-            "company": job.find("span", {"class": "listing-company-name"}).text.strip().split("\n")[-1].strip(),
-            "role": job.find("span", {"class": "listing-company-name"}).find("a").text.strip(),
-            "tags": [i.strip().lower() for i in job.find("span", {"class": "listing-job-type"}).text.split(",")],
-            "date_posted": job.find("span", {"class": "listing-posted"}).text.strip()
-        })
+        try:
+            jobs.append({
+                "href": "https://www.python.org" + job.find("span", {"class": "listing-company-name"}).find("a")["href"],
+                "company": job.find("span", {"class": "listing-company-name"}).text.strip().split("\n")[-1].strip(),
+                "role": job.find("span", {"class": "listing-company-name"}).find("a").text.strip(),
+                "tags": [i.strip().lower() for i in job.find("span", {"class": "listing-job-type"}).text.split(",")],
+                "date_posted": job.find("span", {"class": "listing-posted"}).text.strip()
+            })
+        except:
+            pass
     return jobs
 
 

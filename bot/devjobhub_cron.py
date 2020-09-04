@@ -64,12 +64,9 @@ def remoteok():
     jobs = []
     for job in scraper.remoteok_jobs():
         if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                })
-            except:
-                pass
+            jobs.append({
+                "info": job,
+            })
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -143,12 +140,9 @@ def github():
     jobs = []
     for job in scraper.github_jobs():
         if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                })
-            except:
-                pass
+            jobs.append({
+                "info": job,
+            })
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
