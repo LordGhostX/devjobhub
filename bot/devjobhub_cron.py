@@ -43,15 +43,18 @@ def send_job_to_users(description, tags, job_message, job_url):
 
 def weworkremotely():
     jobs = []
-    for job in scraper.weworkremotely_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                    "details": scraper.weworkremotely_info(job["href"])
-                })
-            except:
-                pass
+    try:
+        for job in scraper.weworkremotely_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                try:
+                    jobs.append({
+                        "info": job,
+                        "details": scraper.weworkremotely_info(job["href"])
+                    })
+                except:
+                    pass
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -63,11 +66,14 @@ def weworkremotely():
 
 def remoteok():
     jobs = []
-    for job in scraper.remoteok_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            jobs.append({
-                "info": job,
-            })
+    try:
+        for job in scraper.remoteok_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                jobs.append({
+                    "info": job,
+                })
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -79,15 +85,18 @@ def remoteok():
 
 def employremotely():
     jobs = []
-    for job in scraper.employremotely_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                    "details": scraper.employremotely_info(job["href"])
-                })
-            except:
-                pass
+    try:
+        for job in scraper.employremotely_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                try:
+                    jobs.append({
+                        "info": job,
+                        "details": scraper.employremotely_info(job["href"])
+                    })
+                except:
+                    pass
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -99,15 +108,18 @@ def employremotely():
 
 def remotive():
     jobs = []
-    for job in scraper.remotive_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                    "details": scraper.remotive_info(job["href"])
-                })
-            except:
-                pass
+    try:
+        for job in scraper.remotive_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                try:
+                    jobs.append({
+                        "info": job,
+                        "details": scraper.remotive_info(job["href"])
+                    })
+                except:
+                    pass
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -119,15 +131,18 @@ def remotive():
 
 def stackoverflow():
     jobs = []
-    for job in scraper.stackoverflow_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                    "details": scraper.stackoverflow_info(job["href"])
-                })
-            except:
-                pass
+    try:
+        for job in scraper.stackoverflow_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                try:
+                    jobs.append({
+                        "info": job,
+                        "details": scraper.stackoverflow_info(job["href"])
+                    })
+                except:
+                    pass
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -139,11 +154,14 @@ def stackoverflow():
 
 def github():
     jobs = []
-    for job in scraper.github_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            jobs.append({
-                "info": job,
-            })
+    try:
+        for job in scraper.github_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                jobs.append({
+                    "info": job,
+                })
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -155,15 +173,18 @@ def github():
 
 def remoteco():
     jobs = []
-    for job in scraper.remoteco_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                    "details": scraper.remoteco_info(job["href"])
-                })
-            except:
-                pass
+    try:
+        for job in scraper.remoteco_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                try:
+                    jobs.append({
+                        "info": job,
+                        "details": scraper.remoteco_info(job["href"])
+                    })
+                except:
+                    pass
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -175,15 +196,18 @@ def remoteco():
 
 def pythonorg():
     jobs = []
-    for job in scraper.pythonorg_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                    "details": scraper.pythonorg_info(job["href"])
-                })
-            except:
-                pass
+    try:
+        for job in scraper.pythonorg_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                try:
+                    jobs.append({
+                        "info": job,
+                        "details": scraper.pythonorg_info(job["href"])
+                    })
+                except:
+                    pass
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
@@ -195,15 +219,18 @@ def pythonorg():
 
 def hackerrank():
     jobs = []
-    for job in scraper.hackerrank_jobs():
-        if not db.jobs.find_one({"href": job["href"]}):
-            try:
-                jobs.append({
-                    "info": job,
-                    "details": scraper.hackerrank_info(job["href"])
-                })
-            except:
-                pass
+    try:
+        for job in scraper.hackerrank_jobs():
+            if not db.jobs.find_one({"href": job["href"]}):
+                try:
+                    jobs.append({
+                        "info": job,
+                        "details": scraper.hackerrank_info(job["href"])
+                    })
+                except:
+                    pass
+    except:
+        pass
     for job in jobs:
         db.jobs.insert_one(
             {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
