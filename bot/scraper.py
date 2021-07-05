@@ -214,28 +214,6 @@ def stackoverflow_info(href):
     }
 
 
-# In[11]:
-
-
-def github_jobs():
-    job_section = requests.get("https://jobs.github.com/positions.json").json()
-
-    jobs = []
-    for job in job_section:
-        try:
-            jobs.append({
-                "href": job["url"],
-                "location": job["location"],
-                "role": job["title"],
-                "company": job["company"],
-                "job_type": job["type"],
-                "description": job["description"]
-            })
-        except:
-            pass
-    return jobs
-
-
 # In[12]:
 
 
@@ -346,6 +324,3 @@ def hackerrank_info(href):
     return {
         "description": description
     }
-
-
-# In[ ]:
