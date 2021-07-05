@@ -151,26 +151,6 @@ def stackoverflow():
         send_job_to_users(job["details"]["description"], job["info"]
                           ["tags"], job_message, job["info"]["href"])
 
-
-def github():
-    jobs = []
-    try:
-        for job in scraper.github_jobs():
-            if not db.jobs.find_one({"href": job["href"]}):
-                jobs.append({
-                    "info": job,
-                })
-    except:
-        pass
-    for job in jobs:
-        db.jobs.insert_one(
-            {**job, "href": job["info"]["href"], "date": datetime.datetime.now()})
-        job_message = config["messages"]["job_message"].format(
-            job["info"]["role"], job["info"]["company"], job["info"]["location"], job["info"]["job_type"], "None", "", job["info"]["href"])
-        send_job_to_users(job["info"]["description"], [],
-                          job_message, job["info"]["href"])
-
-
 def remoteco():
     jobs = []
     try:
@@ -192,7 +172,6 @@ def remoteco():
             job["info"]["role"], job["info"]["company"], job["details"]["location"], "Not Specified", "None", "", job["info"]["href"])
         send_job_to_users(job["details"]["description"],
                           [], job_message, job["info"]["href"])
-
 
 def pythonorg():
     jobs = []
@@ -253,8 +232,6 @@ if __name__ == "__main__":
         remotive()
         print("Scraping stackoverflow jobs...")
         stackoverflow()
-        print("Scraping github jobs...")
-        github()
         print("Scraping remoteco...")
         remoteco()
         print("Scraping pythonorg...")
